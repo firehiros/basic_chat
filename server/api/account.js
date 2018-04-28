@@ -1,17 +1,16 @@
 'use strict';
 
-var _ = require('lodash'),
-    fs = require('fs'),
-    auth = require('./../auth/index'),
-    path = require('path'),
-    settings = require('./../config');
+const _                 = require('lodash');
+const fs                = require('fs');
+const User              = require('./../db/schema/user');
+// const authMiddlewares   = require('./../middleware/authMiddleware');
+const path              = require('path');
+const settings          = require('./../config');
 
 module.exports = function() {
 
-    var app = this.app,
-        core = this.core,
-        middlewares = this.middlewares;
-
+    let app = this.app;
+    const authMiddlewares = this.middlewares['auth'];
     // core.on('account:update', function(data) {
     //     app.io.emit('users:update', data.user);
     // });
@@ -19,7 +18,7 @@ module.exports = function() {
     //
     // Routes
     //
-    app.get('/', middlewares.requireLogin.redirect, function(req, res) {
+    app.get('/', authMiddlewares.verifyToken, function(req, res) {
         // return success
 
         // res.render('chat.html', {
@@ -29,49 +28,97 @@ module.exports = function() {
         // });
     });
 
-    app.get('/login', function(req, res) {
-        // var imagePath = path.resolve('media/img/photos');
-        // var images = fs.readdirSync(imagePath);
-        // var image = _.chain(images).filter(function(file) {
-        //     return /\.(gif|jpg|jpeg|png)$/i.test(file);
-        // }).sample().value();
-        // res.render('login.html', {
-        //     photo: image,
-        //     auth: auth.providers
-        // });
-    });
-
     app.get('/logout', function(req, res ) {
-        req.session.destroy();
-        //
-        // res.redirect('/login');
+        // req.session.destroy();
     });
 
-    app.post('/account/login', function(req) {
+    app.post('/account/authenticate', function(req) {
         // req.io.route('account:login');
+        // find the user
+        User.findOne({
+            name: req.body.name
+        }, function(err, user) {
+
+            if (err) throw err;
+
+            if (!user) {
+              res.json({ success: false, message: 'Authentication failed. User not found.' });
+            } else if (user) {
+
+                // check if password matches
+                if (user.password != req.body.password) {
+                    res.json({
+                        success: false,
+                        message: 'Authentication failed. Wrong password.'
+                    });
+                } else {
+
+                    // if user is found and password is right
+                    // create a token with only our given payload
+                    // we don't want to pass in the entire user since that has the password
+                    const payload = {
+                        admin: user.admin
+                    };
+                    var token = jwt.sign(payload, app.get('superSecret'), {
+                        expiresInMinutes: 1440 // expires in 24 hours
+                    });
+
+                    // return the information including token as JSON
+                    res.json({
+                      success: true,
+                      message: 'Enjoy your token!',
+                      token: token
+                    });
+                }
+
+          }
+
+        });
     });
 
     app.post('/account/register', function(req) {
         // req.io.route('account:register');
+        var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+
+        User.create({
+            username : req.body.username,
+            email : req.body.email,
+            role: 'user', // TODO: Make const role
+            password : hashedPassword
+        },
+        function (err, user) {
+            if (err) {
+                return res.status(500).send("There was a problem registering the user.") // TODO: make const message
+            }
+            let token = user.generateToken();
+            // // create a token
+            // var token = jwt.sign({ id: user._id }, config.secret, {
+            //     expiresIn: 86400 // expires in 24 hours
+            // });
+            res.status(200).send({
+                auth: true,
+                token: token
+            });
+        });
     });
 
-    app.get('/account', middlewares.requireLogin, function(req) {
+    app.get('/account', authMiddlewares.verifyToken, function(req) {
         // req.io.route('account:whoami');
     });
 
-    app.post('/account/profile', middlewares.requireLogin, function(req) {
+    app.post('/account/profile', authMiddlewares.verifyToken, function(req) {
         // req.io.route('account:profile');
     });
 
-    app.post('/account/settings', middlewares.requireLogin, function(req) {
+    app.post('/account/settings', authMiddlewares.verifyToken, function(req) {
         // req.io.route('account:settings');
     });
 
-    app.post('/account/token/generate', middlewares.requireLogin, function(req) {
+    app.post('/account/token/generate', authMiddlewares.verifyToken, function(req) {
         // req.io.route('account:generate_token');
     });
 
-    app.post('/account/token/revoke', middlewares.requireLogin, function(req) {
+    app.post('/account/token/revoke', authMiddlewares.verifyToken, function(req) {
         // req.io.route('account:revoke_token');
     });
 

@@ -1,12 +1,16 @@
-var _       = require('lodash')
-var path    = require('path')
-var fs      = require('fs')
-var express = require('express')
-var bodyParser = require('body-parser')
-var cookieParser = require('cookie-parser')
+const _             = require('lodash')
+const path          = require('path')
+const fs            = require('fs')
+const express       = require('express')
+const bodyParser    = require('body-parser')
+const mongoose      = require('mongoose')
+const http          = require('http')
 
-var config  = require('./config')
-var auth    = require('./src/core/auth')
+const config        = require('./config')
+// const auth          = require('./src/core/auth');
+
+const apiList       = require('./api');
+const middlewares   = require('./middleware');
 
 var app = express();
 
@@ -22,13 +26,23 @@ app.use(function(req, res, next) {
     next();
 });
 
-// Set compression before any routes
-app.use(compression({ threshold: 512 }));
+//
+// API
+//
+_.each(apiList, function(api) {
+    api.apply({
+        app: app,
+        middlewares: middlewares,
+        // models: models
+    });
+});
 
-app.use(cookieParser());
+// Set compression before any routes
+// app.use(compression({ threshold: 512 }));
+
 
 // setup authentication
-auth.setup(app);
+// auth.setup(app);
 
 //
 // Mongo

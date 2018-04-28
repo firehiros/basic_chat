@@ -1,7 +1,6 @@
 'use strict';
 
 let init = () => {
-
     // let redisURI 		= require('url').parse(process.env.REDIS_URL);
     // let redisPassword 	= redisURI.auth.split(':')[1];
 	if(process.env.NODE_ENV === 'production') {
@@ -22,7 +21,7 @@ let init = () => {
             },
             auth: {
                 type: 'local',
-                enableRegistration: true;
+                enableRegistration: true
             }
 			// redis: {
 			// 	host: redisURI.hostname,
@@ -30,7 +29,7 @@ let init = () => {
 			// 	password: redisPassword
 			// }
 		}
-	} else if(process.env.NODE_ENV === 'develop')(
+	} else if(process.env.NODE_ENV === 'develop') {
 		return {
             db: 'mongodb://localhost/exchange_dev',
             sessionSecret: process.env.sessionSecret,
@@ -46,8 +45,8 @@ let init = () => {
                 cert: ''
             },
             auth: {
-                type: 'local',
-                enableRegistration: true;
+                enableRegistration: true,
+				passwordRegex: "^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
             }
 			// redis: {
 			// 	host: redisURI.hostname,
@@ -55,7 +54,7 @@ let init = () => {
 			// 	password: redisPassword
 			// }
 		}
-    )
+    }
     // Default config
 	else {
 		return {
@@ -74,7 +73,7 @@ let init = () => {
             },
             auth: {
                 type: 'local',
-                enableRegistration: true;
+                enableRegistration: true
             }
 			// redis: {
 			// 	host: redisURI.hostname,
