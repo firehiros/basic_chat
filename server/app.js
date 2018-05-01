@@ -5,14 +5,16 @@ const express       = require('express')
 const bodyParser    = require('body-parser')
 const mongoose      = require('mongoose')
 const http          = require('http')
+const cors          = require('cors')
 
 const config        = require('./config')
 // const auth          = require('./src/core/auth');
 
-const apiList       = require('./api');
-const middlewares   = require('./middleware');
+const apiList       = require('./api')
+const middlewares   = require('./middleware')
 
 var app = express();
+app.use(cors());
 
 // HTTP Middlewares
 app.use(bodyParser.json());
@@ -33,6 +35,7 @@ _.each(apiList, function(api) {
     api.apply({
         app: app,
         middlewares: middlewares,
+        config: config
         // models: models
     });
 });

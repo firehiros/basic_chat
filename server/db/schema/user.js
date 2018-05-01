@@ -5,18 +5,16 @@ const mongoose          = require('mongoose');
 const uniqueValidator   = require('mongoose-unique-validator');
 const validate          = require('mongoose-validate');
 const config            = require('./../../config');
+const jwt               = require('jsonwebtoken');
 
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var UserSchema = new mongoose.Schema({
-    provider: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    uid: {
+    username: {
         type: String,
         required: false,
+        lowercase: true,
+        unique: true,
         trim: true,
         validate: [function(v) {
             return (v.length <= 24);
@@ -28,13 +26,19 @@ var UserSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
         unique: true,
-        validate: [ validate.email, 'invalid email address' ]
+        validate: [ validate.email, 'Invalid email address' ]
     },
-    password: {
+    role: {
         type: String,
         required: true,
         trim: true,
-        match: new RegExp(config.auth.passwordRegex),
+        lowercase: true
+    },
+    password: {
+        type: String,
+        required: [true, "Password is required"],
+        trim: true,
+        match: [new RegExp(config.auth.passwordRegex), 'Minimum eight characters, at least one letter and one number'],
         set: function(value) {
             return value
         }
@@ -46,17 +50,14 @@ var UserSchema = new mongoose.Schema({
     },
     firstName: {
         type: String,
-        required: true,
         trim: true
     },
     lastName: {
         type: String,
-        required: true,
         trim: true
     },
-    displayName: {
+    avatar: {
         type: String,
-        required: true,
         trim: true
     },
     joined: {
@@ -72,8 +73,8 @@ var UserSchema = new mongoose.Schema({
 		ref: 'Room'
     }],
     openRooms: [{
-      		type: String,
-                trim: true
+  		type: String,
+        trim: true
     }],
 	messages: [{
 		type: ObjectId,
@@ -99,6 +100,7 @@ UserSchema.pre('save', function(next) {
             return next(err);
         }
         user.password = hash;
+        user.joined = Date.now();
         next();
     });
 });
@@ -124,18 +126,16 @@ UserSchema.methods.generateToken = function(cb) {
     if (!this._id) {
         return cb('User needs to be saved.');
     }
-    this.token = jwt.sign({ id: user._id }, config.secret, {
+    this.token = jwt.sign({
+        id: this._id
+        // scopes: [this.role]
+    }, config.tokenSecrect, {
         expiresIn: 86400 // expires in 24 hours
     });
+    return this.token;
 };
 
 UserSchema.methods.comparePassword = function(password, cb) {
-
-    // Legacy password hashes
-    if (hash.sha256(password, 10) === this.password) {
-        return cb(null, true);
-    }
-
     // Current password hashes
     bcrypt.compare(password, this.password, function(err, isMatch) {
 
@@ -161,7 +161,7 @@ UserSchema.statics.authenticate = function(identifier, password, cb) {
 
         // Does the user exist?
         if (!user) {
-            return cb(null, null, 0);
+            return cb(null, null, false);
         }
 
         // Is password okay?
@@ -170,17 +170,59 @@ UserSchema.statics.authenticate = function(identifier, password, cb) {
                 return cb(err);
             }
             if (isMatch) {
-                return cb(null, user);
+                return cb(null, user, isMatch);
             }
             // Bad password
-            return cb(null, null, 1);
+            return cb(null, null, isMatch);
+        });
+    });
+};
+UserSchema.statics.updateProfile = function(id, options, cb) {
+    var usernameChange = false;
+    
+    this.findById(id, function (err, user) {
+        if (err) {
+            return cb(err);
+        }
+
+        if (options.firstName) {
+            user.firstName = options.firstName;
+        }
+        if (options.lastName) {
+            user.lastName = options.lastName;
+        }
+        if (options.displayName) {
+            user.displayName = options.displayName;
+        }
+        if (options.email) {
+            user.email = options.email;
+        }
+        if (options.avatar) {
+            user.avatar = options.avatar;
+        }
+
+        if (options.openRooms) {
+            user.openRooms = options.openRooms;
+        }
+
+        if (options.password || options.newPassword) {
+            user.password = options.password || options.newPassword;
+        }
+
+        user.save(function(err, user) {
+            if (err) {
+                return cb(err);
+            }
+
+            if (cb) {
+                cb(null, user);
+            }
+
         });
     });
 };
 
-UserSchema.plugin(uniqueValidator, {
-    message: 'Expected {PATH} to be unique'
-});
+UserSchema.plugin(uniqueValidator);
 
 // EXPOSE ONLY CERTAIN FIELDS
 // It's really important that we keep

@@ -1,46 +1,63 @@
 'use strict';
 
-var passport = require('passport');
-
+// var passport = require('passport');
+const _           = require('lodash')
+const jwt         = require('jsonwebtoken');
+const config      = require('./../config');
 
 module.exports.verifyToken = (req, res, next) => {
-    let token = req.headers['x-access-token'];
+    let token = req.body.token || req.params.token || req.headers['x-access-token'];
+    var req_scopes = req.body.scope || req.params.scope || req.headers["x-security-scopes"];
+
     if (!token){
         return res.status(403).send({
             auth: false,
             message: 'No token provided.'
         });
     }
-    jwt.verify(token, config.secret, function(err, decoded) {
+    jwt.verify(token, config.tokenSecrect, function(err, payload) {
         if (err){
-            return res.status(500).send({
+            return res.status(401).send({
                 auth: false,
-                message: 'Failed to authenticate token.'
+                message: 'Failed to authenticate token.',
+                error: err
             });
         }
-        // if everything good, save to request for use in other routes
-        req.userId = decoded.id;
-        next();
+        // TODO: create token with permission
+        // if (_.intersection(payload.scopes, req_scopes).length == 0) {
+        //
+        //     console.log(req_scopes);
+        //     console.log(payload.scopes);
+        //     return res.status(401).send({
+        //         auth: false,
+        //         message: 'Not Authorized!'
+        //     });
+        // }
+        // else {
+            // if everything good, save to request for use in other routes
+            req.userId = payload.id;
+            next();
+        // }
     });
 }
-module.exports.authMiddleware = (fail) => {
-    return function(req, res, next) {
-        if (req.user) {
-            next();
-            return;
-        }
-
-        if (req.headers && req.headers.authorization) {
-            let parts = req.headers.authorization.split(' ');
-            if (parts.length === 2) {
-                let scheme = parts[0];
-                if (/^Basic$/i.test(scheme)) {
-                    let auth = passport.authenticate('basic', { session: false });
-                    return auth(req, res, next);
-                }
-            }
-        }
-
-        fail(req, res);
-    };
-}
+// module.exports.authMiddleware = (fail) => {
+//     return function(req, res, next) {
+//         if (req.user) {
+//             next();
+//             return;
+//         }
+//
+//         if (req.headers && req.headers.authorization) {
+//             let parts = req.headers.authorization.split(' ');
+//             if (parts.length === 2) {
+//                 let scheme = parts[0];
+//                 if (/^Basic$/i.test(scheme)) {
+//                     let auth = passport.authenticate('basic', { session: false });
+//                     return auth(req, res, next);
+//                 }
+//             }
+//         }
+//
+//         fail(req, res);
+//     };
+// }

@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "test": "jest",
-    "start": "node app.js"
+    "start": "SECRECT='secrect_code' node app.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/firehiros/basic_exchange#readme",
   "devDependencies": {
+    "axios": "^0.18.0",
+    "cors": "^2.8.4",
     "jest": "^22.4.3",
     "mongoose": "^5.0.16",
     "passport": "^0.4.0"
@@ -34,6 +36,7 @@
     "express": "^4.16.3",
     "fs": "0.0.1-security",
     "http": "0.0.0",
+    "jsonwebtoken": "^8.2.1",
     "lodash": "^4.17.10",
     "mongoose-unique-validator": "^2.0.1",
     "mongoose-validate": "0.0.5",

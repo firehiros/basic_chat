@@ -2,14 +2,14 @@
 
 const _                 = require('lodash');
 const fs                = require('fs');
+const path              = require('path');
+
 const User              = require('./../db/schema/user');
 // const authMiddlewares   = require('./../middleware/authMiddleware');
-const path              = require('path');
-const settings          = require('./../config');
 
 module.exports = function() {
-
     let app = this.app;
+    let config = this.config
     const authMiddlewares = this.middlewares['auth'];
     // core.on('account:update', function(data) {
     //     app.io.emit('users:update', data.user);
@@ -19,99 +19,178 @@ module.exports = function() {
     // Routes
     //
     app.get('/', authMiddlewares.verifyToken, function(req, res) {
-        // return success
-
-        // res.render('chat.html', {
-        //     account: req.user,
-        //     settings: settings,
-        //     version: psjon.version
-        // });
     });
 
     app.get('/logout', function(req, res ) {
         // req.session.destroy();
     });
 
-    app.post('/account/authenticate', function(req) {
+    app.post('/account/authenticate', function(req, res) {
         // req.io.route('account:login');
-        // find the user
-        User.findOne({
-            name: req.body.name
-        }, function(err, user) {
 
-            if (err) throw err;
+        var fields = req.body || req.data;
 
+        User.authenticate(fields.username || fields.email, fields.password, (err, user, isMatch) => {
+            if (err) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Sorry, we could not process your request.',
+                    error: err
+                });
+            }
             if (!user) {
-              res.json({ success: false, message: 'Authentication failed. User not found.' });
-            } else if (user) {
-
-                // check if password matches
-                if (user.password != req.body.password) {
-                    res.json({
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication failed. User not found.'
+                });
+            } else {
+                if (!isMatch) {
+                    res.status(401).json({
                         success: false,
                         message: 'Authentication failed. Wrong password.'
                     });
                 } else {
 
-                    // if user is found and password is right
-                    // create a token with only our given payload
-                    // we don't want to pass in the entire user since that has the password
-                    const payload = {
-                        admin: user.admin
-                    };
-                    var token = jwt.sign(payload, app.get('superSecret'), {
-                        expiresInMinutes: 1440 // expires in 24 hours
-                    });
+                    let token = user.generateToken();
 
-                    // return the information including token as JSON
-                    res.json({
+                    res.status(201).send({
                       success: true,
-                      message: 'Enjoy your token!',
+                      message: 'Authentication successful',
                       token: token
                     });
                 }
-
-          }
-
+            }
         });
     });
 
-    app.post('/account/register', function(req) {
+    app.post('/account/register', function(req, res) {
         // req.io.route('account:register');
-        var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+        let fields = req.body || req.data;
 
-        User.create({
-            username : req.body.username,
-            email : req.body.email,
-            role: 'user', // TODO: Make const role
-            password : hashedPassword
-        },
-        function (err, user) {
+        // Sanity check the password
+        let passwordConfirm = fields.passwordConfirm || fields.passwordConfirm || fields['password-confirm'];
+
+        if (fields.password !== passwordConfirm) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Password not confirmed'
+            });
+        }
+
+        let data = {
+            username: fields.username,
+            email: fields.email,
+            role: 'user',
+            password: fields.password,
+            firstName: fields.firstName || fields.firstname || fields['first-name'],
+            lastName: fields.lastName || fields.lastname || fields['last-name'],
+            avatar: fields.avatar || fields.avatar || fields['avatar']
+        };
+
+        User.create(data, function(err, user) {
             if (err) {
-                return res.status(500).send("There was a problem registering the user.") // TODO: make const message
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Sorry, we could not process your request.',
+                    error: err
+                });
             }
             let token = user.generateToken();
-            // // create a token
-            // var token = jwt.sign({ id: user._id }, config.secret, {
-            //     expiresIn: 86400 // expires in 24 hours
-            // });
-            res.status(200).send({
-                auth: true,
+
+            res.status(201).json({
+                status: 'success',
+                message: 'You\'ve been registered, please try logging in now!',
                 token: token
             });
         });
     });
 
-    app.get('/account', authMiddlewares.verifyToken, function(req) {
+    app.get('/account/profile', authMiddlewares.verifyToken, function(req, res) {
+        User.findById(req.userId, function (err, user) {
+            if (err) {
+                return res.status(500).send({
+                    error: err
+                })
+            }
+            if (!user) {
+                res.status(400).json({
+                    success: false,
+                    message: 'User not found.',
+                });
+            } else if (user) {
+                res.status(201).send({
+                  success: true,
+                  user: user
+                });
+            }
+        });
         // req.io.route('account:whoami');
     });
 
-    app.post('/account/profile', authMiddlewares.verifyToken, function(req) {
-        // req.io.route('account:profile');
-    });
+    app.post('/account/update', authMiddlewares.verifyToken, function(req, res) {
+        // req.io.route('account:register');
+        var fields = req.body || req.data;
+        let data = {
+            username: fields.username,
+            email: fields.email,
+            currentPassword: fields.password || fields['current-password'] || fields.currentPassword,
+            newPassword: fields['new-password'] || fields.newPassword,
+            passwordConfirm: fields['confirm-password'] || fields.passwordConfirm,
+            role: fields.role || fields['user-role'],
+            firstName: fields.firstName || fields.firstname || fields['first-name'],
+            lastName: fields.lastName || fields.lastname || fields['last-name'],
+            avatar: fields.avatar || fields.avatar || fields['avatar']
+        };
 
-    app.post('/account/settings', authMiddlewares.verifyToken, function(req) {
-        // req.io.route('account:settings');
+        if (data.newPassword && data.newPassword !== data.passwordConfirm) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Password not confirmed'
+            });
+        }
+
+        User.authenticate(data.username || data.email, data.currentPassword, (err, user, isMatch) => {
+            if (err) {
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'There were problems authenticating you.',
+                    error: err
+                });
+            }
+
+            if (!user) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication failed. User not found.'
+                });
+            } else {
+                if (!isMatch) {
+                    res.status(401).json({
+                        success: false,
+                        message: 'Incorrect login credentials.'
+                    });
+                } else {
+
+                    User.updateProfile(req.userId, data, function (err, user, reason) {
+                        if (err || !user) {
+                            return res.status(400).json({
+                                status: 'error',
+                                message: 'Unable to update your account.',
+                                reason: reason,
+                                error: err
+                            });
+                        }
+                        let token = user.generateToken();
+                        res.status(201).json({
+                          success: true,
+                          message: 'Update successfully',
+                          token: token,
+                          user: user
+                        });
+                    });
+                }
+            }
+        });
     });
 
     app.post('/account/token/generate', authMiddlewares.verifyToken, function(req) {
