@@ -56,7 +56,8 @@ module.exports = function() {
                     res.status(201).send({
                       success: true,
                       message: 'Authentication successful',
-                      token: token
+                      token: token,
+                      user: user
                     });
                 }
             }
@@ -100,7 +101,8 @@ module.exports = function() {
             res.status(201).json({
                 status: 'success',
                 message: 'You\'ve been registered, please try logging in now!',
-                token: token
+                token: token,
+                user: user
             });
         });
     });

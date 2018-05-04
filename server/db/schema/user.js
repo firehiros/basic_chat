@@ -122,6 +122,35 @@ UserSchema.statics.findByIdentifier = function(identifier, cb) {
     this.findOne(opts, cb);
 };
 
+UserSchema.statics.findByToken = function(token, cb) {
+    if (!token) {
+        return cb(null, null);
+    }
+    jwt.verify(token, config.tokenSecrect, (err, payload) => {
+        if (err){
+            return cb(err);
+        }
+
+        let userId = payload.id;
+
+        if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+            cb(null, null);
+        }
+
+        this.findById(userId, function(err, user) {
+            if (err) {
+                return cb(err);
+            }
+
+            if (!user) {
+                return cb(null, null);
+            }
+
+            return cb(null, user);
+        });
+    });
+};
+
 UserSchema.methods.generateToken = function(cb) {
     if (!this._id) {
         return cb('User needs to be saved.');
@@ -179,7 +208,7 @@ UserSchema.statics.authenticate = function(identifier, password, cb) {
 };
 UserSchema.statics.updateProfile = function(id, options, cb) {
     var usernameChange = false;
-    
+
     this.findById(id, function (err, user) {
         if (err) {
             return cb(err);

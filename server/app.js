@@ -1,11 +1,12 @@
 const _             = require('lodash')
 const path          = require('path')
 const fs            = require('fs')
-const express       = require('express')
+const express       = require('express.oi');
 const bodyParser    = require('body-parser')
 const mongoose      = require('mongoose')
 const http          = require('http')
 const cors          = require('cors')
+const socket        = require('socket.io')
 
 const config        = require('./config')
 // const auth          = require('./src/core/auth');
@@ -14,7 +15,22 @@ const apiList       = require('./api')
 const middlewares   = require('./middleware')
 
 var app = express();
-app.use(cors());
+if(config.https.enable){
+    app = app.https({
+        key: fs.readFileSync(settings.https.key),
+        cert: fs.readFileSync(settings.https.cert),
+        passphrase: config.https.passphrase
+    }).io();
+
+    // var httpsServer = express().createServer({
+    //     key: fs.readFileSync(settings.https.key),
+    //     cert: fs.readFileSync(settings.https.cert),
+    //     passphrase: config.https.passphrase
+    // });
+    // httpsServer.listen(config.https.port);
+} else {
+    app = app.http().io();
+}
 
 // HTTP Middlewares
 app.use(bodyParser.json());
@@ -27,6 +43,9 @@ app.use(function(req, res, next) {
     res.setHeader('X-UA-Compatible', 'IE=Edge,chrome=1');
     next();
 });
+
+// Cors Error
+app.use(cors());
 
 //
 // API
@@ -62,19 +81,21 @@ mongoose.connect(config.db, function(err) {
     if (err) {
         throw err;
     }
+    
+    app.listen(config.http.port);
 
+    // //
+    // // Server
+    // //
+    // var httpServer = http.createServer(app);
     //
-    // Server
     //
-    var httpServer = http.createServer(app);
-    httpServer.listen(config.http.port);
-
-    if(config.https.enable){
-        var httpsServer = express().createServer({
-            key: fs.readFileSync(settings.https.key),
-            cert: fs.readFileSync(settings.https.cert),
-            passphrase: config.https.passphrase
-        });
-        httpsServer.listen(config.https.port);
-    }
+    // if(config.https.enable){
+    //     var httpsServer = express().createServer({
+    //         key: fs.readFileSync(settings.https.key),
+    //         cert: fs.readFileSync(settings.https.cert),
+    //         passphrase: config.https.passphrase
+    //     });
+    //     httpsServer.listen(config.https.port);
+    // }
 });

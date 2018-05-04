@@ -40,24 +40,3 @@ module.exports.verifyToken = (req, res, next) => {
         // }
     });
 }
-// module.exports.authMiddleware = (fail) => {
-//     return function(req, res, next) {
-//         if (req.user) {
-//             next();
-//             return;
-//         }
-//
-//         if (req.headers && req.headers.authorization) {
-//             let parts = req.headers.authorization.split(' ');
-//             if (parts.length === 2) {
-//                 let scheme = parts[0];
-//                 if (/^Basic$/i.test(scheme)) {
-//                     let auth = passport.authenticate('basic', { session: false });
-//                     return auth(req, res, next);
-//                 }
-//             }
-//         }
-//
-//         fail(req, res);
-//     };
-// }

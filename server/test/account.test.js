@@ -41,7 +41,7 @@ describe('TEST Account API', () => {
         }).then((response) => {
             expect(response.status).toBe(201);
             User.findOne({
-                username: 'fred'
+                username: response.data.user.username
             }, function(err, user) {
                 expect(err).toBe(null);
                 expect(user.username).toBe('fred');
