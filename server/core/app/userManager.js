@@ -1,49 +1,39 @@
 
 'use strict';
-
+const _ = require('lodash');
 const EventEmitter = require('events');
 const util = require('util');
 
 module.exports = class UserManager extends EventEmitter {
     constructor(options){
         super();
-        this.rooms = {};
+        this.users = {};
+
+        this.get = this.get.bind(this);
+        this.getOrAdd = this.getOrAdd.bind(this);
+        this.remove = this.remove.bind(this);
     }
-    get(roomId) {
-        roomId = roomId.toString();
-        return this.rooms[roomId];
+    get(userId) {
+        return this.users[userId];
     }
-    slug(slug) {
-        return _.find(this.rooms, function(room) {
-            return room.roomSlug === slug;
+    getByUsername(username) {
+        return _.find(this.users, function(user) {
+            return user.username === username;
         });
     }
-    getOrAdd(room) {
-        var roomId = room._id.toString();
-        var pRoom = this.rooms[roomId];
-        if (!pRoom) {
-            pRoom = this.rooms[roomId] = new Room({
-                room: room
-            });
-            pRoom.on('user_join', this.onJoin);
-            pRoom.on('user_leave', this.onLeave);
+    getOrAdd(user) {
+        user = typeof user.toJSON === 'function' ? user.toJSON() : user;
+        let userId = user.id.toString();
+        if (!this.users[userId]) {
+            _.assign(user, { id: userId });
+            this.users[userId] = user;
+            // this.core.avatars.add(user);
         }
-        return pRoom;
+        return this.users[userId];
     }
-    onJoin(data) {
-        this.emit('user_join', data);
-    }
-    onLeave(data) {
-        this.emit('user_leave', data);
-    }
-    usernameChanged(data) {
-        Object.keys(this.rooms).forEach(function(key) {
-            this.rooms[key].usernameChanged(data);
-        }, this);
-    }
-    removeConnection(connection) {
-        Object.keys(this.rooms).forEach(function(key) {
-            this.rooms[key].removeConnection(connection);
-        }, this);
+    remove(user) {
+        user = typeof user.toJSON === 'function' ? user.toJSON() : user;
+        let userId = typeof user === 'object' ? user.id.toString() : user;
+        delete this.users[userId];
     }
 }

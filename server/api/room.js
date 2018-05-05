@@ -2,7 +2,6 @@
 
 // var settings = require('./../config').rooms;
 const User              = require('./../db/schema/user');
-const Room              = require('./../db/schema/room');
 const RoomController    = require('./../core').RoomController;
 const AppManager        = require('./../core').AppManager;
 
@@ -41,7 +40,7 @@ module.exports = function() {
 
     var getEmitters = function(room) {
         if (room.private && !room.hasPassword) {
-            var connections = AppManager.connectionManager.getConnections({
+            var connections = AppManager.system.connections.getConnections({
                 type: 'socket.io'
             }).filter(function(connection) {
                 return room.isAuthorized(connection.user);
@@ -118,7 +117,7 @@ module.exports = function() {
     //
     app.io.route('rooms', {
         list: function(req, res, user) {
-            let userId = user ? (user._id || user.userId || user) : req.userId;
+            let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
             let options = {
                 userId: userId,
                 users: req.param('users'),
@@ -139,8 +138,8 @@ module.exports = function() {
                 res.json(results);
             });
         },
-        get: function(req, res, user) {
-            let userId = user ? (user._id || user.userId || user) : req.userId;
+        get: function(req, res,) {
+            let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
 
             let options = {
                 userId: userId,
@@ -164,9 +163,9 @@ module.exports = function() {
             });
         },
         create: function(req, res) {
-            let user = req.userId;
+            let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
             let options = {
-                owner: user,
+                owner: userId,
                 name: req.param('name'),
                 slug: req.param('slug'),
                 description: req.param('description'),
@@ -180,10 +179,11 @@ module.exports = function() {
                     return res.status(400).json(err);
                 }
 
-                res.json(room.toJSON(user));
+                res.json(room.toJSON(req.user));
             });
         },
         update: function(req, res) {
+            let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
             var roomId = req.param('room') || req.param('id');
 
             var options = {
@@ -192,10 +192,11 @@ module.exports = function() {
                 description: req.param('description'),
                 password: req.param('password'),
                 participants: req.param('participants'),
-                userId: req.userId
+                userId: userId
             };
             RoomController.updateRoom(roomId, options, function(err, room) {
                 if (err) {
+                    console.log(err);
                     return res.status(400).json(err);
                 }
 
@@ -203,7 +204,7 @@ module.exports = function() {
                     return res.sendStatus(404);
                 }
 
-                res.json(room.toJSON(req.userId));
+                res.json(room.toJSON(req.user));
             });
         },
         archive: function(req, res) {
@@ -223,8 +224,9 @@ module.exports = function() {
             });
         },
         join: function(req, res) {
+            let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
             var options = {
-                userId: req.userId
+                userId: userId
             };
 
             if (typeof req.data === 'string') {
@@ -260,7 +262,7 @@ module.exports = function() {
                 var user = req.user.toJSON();
                 user.room = room._id;
 
-                core.presence.join(req.socket.conn, room);
+                AppManager.join(req.socket.conn, room);
                 req.socket.join(room._id);
                 res.json(room.toJSON(req.user));
             });
@@ -270,7 +272,7 @@ module.exports = function() {
             var user = req.user.toJSON();
             user.room = roomId;
 
-            core.presence.leave(req.socket.conn, roomId);
+            AppManager.leave(req.socket.conn, roomId);
             req.socket.leave(roomId);
             res.json();
         },
@@ -287,7 +289,7 @@ module.exports = function() {
                     return res.sendStatus(404);
                 }
 
-                var users = core.presence.rooms
+                var users = AppManager.roomManager
                         .getOrAdd(room)
                         .getUsers()
                         .map(function(user) {

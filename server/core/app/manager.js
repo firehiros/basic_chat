@@ -14,8 +14,8 @@ module.exports = class AppManager extends EventEmitter {
         this.connectionManager = new ConnectionManager();
         this.roomManager = new RoomManager();
         this.userManager = new UserManager({ core: this.core });
-        this.roomManager.on('user_join', this.onJoin);
-        this.roomManager.on('user_leave', this.onLeave);
+        this.roomManager.on('user_join', this.onJoin.bind(this));
+        this.roomManager.on('user_leave', this.onLeave.bind(this));
     }
     getUserCountInRoom(roomId) {
         var room = this.roomManager.get(roomId);

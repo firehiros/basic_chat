@@ -213,6 +213,9 @@ UserSchema.statics.updateProfile = function(id, options, cb) {
         if (err) {
             return cb(err);
         }
+        if (!user) {
+            return cb(null, null);
+        }
 
         if (options.firstName) {
             user.firstName = options.firstName;

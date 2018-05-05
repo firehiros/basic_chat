@@ -9,25 +9,24 @@ class SocketConnection extends Connection {
         super('socket.io', user)
         this.socket = socket;
         socket.conn = this;
+        this.disconnect = this.disconnect.bind(this);
+        socket.on('disconnect', this.disconnect);
     }
 
     disconnect() {
         this.emit('disconnect');
-
         this.socket.conn = null;
         this.socket = null;
     }
 }
 module.exports = function() {
     const app = this.app;
-    console.log("RUN SOCKET");
     app.io.use(function (socket, next) {
-        console.log("AUTHORIZATION SOCKET");
-        let User = mongoose.model('User');
         if (socket.request._query && socket.request._query.token) {
+            let User = mongoose.model('User');
             User.findByToken(socket.request._query.token, function(err, user) {
                 if (err || !user) {
-                    return next('Fail');
+                    return next(new Error('Authentication error'));
                 }
 
                 socket.request.user = user;
@@ -39,15 +38,14 @@ module.exports = function() {
     });
 
     app.io.on('connection', function(socket) {
-        console.log("CONNECTIONS");
         let userId = socket.request.user._id;
+        let User = mongoose.model('User');
         User.findById(userId, function (err, user) {
             if (err) {
                 console.error(err);
                 return;
             }
-            let conn = new SocketIoConnection(user, socket);
-            socket.on('disconnect', conn.disconnect);
+            let conn = new SocketConnection(user, socket);
             Core.AppManager.connect(conn);
         });
     });

@@ -35,7 +35,7 @@ module.exports.verifyToken = (req, res, next) => {
         // }
         // else {
             // if everything good, save to request for use in other routes
-            req.userId = payload.id;
+            req.user = payload.id;
             next();
         // }
     });

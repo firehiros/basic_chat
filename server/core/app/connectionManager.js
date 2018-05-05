@@ -7,6 +7,15 @@ module.exports = class ConnectionManager extends EventEmitter {
     constructor(type, user){
         super();
         this.connections = {};
+
+        this.get = this.get.bind(this);
+        this.getUsers = this.getUsers.bind(this);
+        this.getUserIds = this.getUserIds.bind(this);
+        this.getUsernames = this.getUsernames.bind(this);
+
+        this.add = this.add.bind(this);
+        this.remove = this.remove.bind(this);
+        this.removeAll = this.removeAll.bind(this);
     }
     get(connectionId) {
         return this.connections[connectionId];
@@ -22,7 +31,7 @@ module.exports = class ConnectionManager extends EventEmitter {
         var connections = this.connections;
 
         if (filter) {
-            connections = this.query(filter);
+            connections = this.getConnections(filter);
         }
 
         return _.chain(connections)
@@ -54,7 +63,6 @@ module.exports = class ConnectionManager extends EventEmitter {
         if (options.userId) {
             options.userId = options.userId.toString();
         }
-
         return _.map(this.connections, function(value) {
             return value;
         }).filter(function(conn) {

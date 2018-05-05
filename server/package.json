@@ -42,6 +42,7 @@
     "lodash": "^4.17.10",
     "mongoose-unique-validator": "^2.0.1",
     "mongoose-validate": "0.0.5",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "socket.io": "^2.1.0"
   }
 }

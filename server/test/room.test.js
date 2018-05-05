@@ -7,6 +7,7 @@ const User          = require('./../db/schema/user');
 const Room          = require('./../db/schema/room');
 const config        = require('./../config');
 
+let userInfo, pToken;
 describe('TEST ROOM API', () => {
     beforeAll((next) => {
         mongoose.connection.on('error', function (err) {
@@ -24,8 +25,8 @@ describe('TEST ROOM API', () => {
 
             // Create User
             axios.post('http://localhost:8000/account/register', {
-                username: 'fred',
-                email: 'fred@gmail.com',
+                username: 'room',
+                email: 'room@gmail.com',
                 password: '12345678a',
                 passwordConfirm: '12345678a'
             }).then((response) => {
@@ -43,15 +44,19 @@ describe('TEST ROOM API', () => {
         // // Drop all user collections
         // User.collection.drop()
     });
+    beforeEach((next) => {
+        axios.post('http://localhost:8000/account/authenticate', {
+            username: "room",
+            password: "12345678a"
+        }).then((response) => {
+            expect(response.status).toBe(201);
+            userInfo = response.data.user;
+            pToken = response.data.token
+            next();
+        })
+    });
 
     it(`Create room`, async () => {
-        let response = await axios.post('http://localhost:8000/account/authenticate', {
-            username: "fred",
-            password: "12345678a"
-        })
-        let token = response.data.token;
-        let userId = response.data.user.id;
-
         // Create room
         let data = {
             name: 'Room Test 01',
@@ -60,12 +65,13 @@ describe('TEST ROOM API', () => {
         }
         response = await axios.post('http://localhost:8000/rooms', data ,{
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
-        });
+        }).catch((error) => console.log(error));
+
         let room = response.data;
         expect(response.status).toBe(200);
-        expect(room.owner).toBe(userId);
+        expect(room.owner).toBe(userInfo.id);
         expect(room.name).toBe(data.name);
         expect(room.slug).toBe(data.slug);
         expect(room.description).toBe(data.description);
@@ -73,10 +79,11 @@ describe('TEST ROOM API', () => {
         // Check room is exist
         response = await axios.get('http://localhost:8000/rooms',{
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
-        })
+        }).catch((error) => console.log(error))
         expect(response.status).toBe(200);
+
         let rooms = response.data;
         rooms.forEach((r) => {
             if(r.id === room.id){
@@ -85,10 +92,11 @@ describe('TEST ROOM API', () => {
                 expect(r.description).toBe(room.description);
                 expect(r.owner).toBe(room.owner);
             }
-        })
+        });
+
         response = await axios.get(`http://localhost:8000/rooms/${room.id}`,{
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
         }).catch((error) => console.log(error))
         expect(response.status).toBe(200);
@@ -100,14 +108,6 @@ describe('TEST ROOM API', () => {
     });
 
     it(`Update room`, async () => {
-        // Authenticate user
-        let response = await axios.post('http://localhost:8000/account/authenticate', {
-            username: "fred",
-            password: "12345678a"
-        })
-        let token = response.data.token;
-        let userId = response.data.user.id;
-
         // Create room
         let data = {
             name: 'Room Test 02',
@@ -116,7 +116,7 @@ describe('TEST ROOM API', () => {
         }
         response = await axios.post('http://localhost:8000/rooms', data, {
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
         })
         expect(response.status).toBe(200);
@@ -127,26 +127,18 @@ describe('TEST ROOM API', () => {
             description: 'Description is modified'
         },{
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
         })
         let room = response.data;
         expect(response.status).toBe(200);
-        expect(room.owner).toBe(userId);
+        expect(room.owner).toBe(userInfo.id);
         expect(room.name).toBe(`Room's name is modified`);
         expect(room.slug).toBe(data.slug);
         expect(room.description).toBe('Description is modified');
 
     });
     it(`Delete room`, async () => {
-        // Authenticate user
-        let response = await axios.post('http://localhost:8000/account/authenticate', {
-            username: "fred",
-            password: "12345678a"
-        })
-        let token = response.data.token;
-        let userId = response.data.user.id;
-
         // Create room
         let data = {
             name: 'Room Test 03',
@@ -155,7 +147,7 @@ describe('TEST ROOM API', () => {
         }
         response = await axios.post('http://localhost:8000/rooms', data, {
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
         })
         expect(response.status).toBe(200);
@@ -163,7 +155,7 @@ describe('TEST ROOM API', () => {
         // Delete room
         response = await axios.delete(`http://localhost:8000/rooms/${response.data.id}`,{
             headers: {
-                'x-access-token': token
+                'x-access-token': pToken
             }
         })
         let room = response.data;

@@ -6,8 +6,8 @@ const mongoose      = require('mongoose');
 const User          = require('./../db/schema/user');
 const config        = require('./../config');
 
-describe('TEST Account API', () => {
-    beforeEach(() => {
+describe('TEST ACCOUNT API', () => {
+    beforeAll(() => {
         mongoose.connection.on('error', function (err) {
             throw new Error(err);
         });
@@ -23,7 +23,7 @@ describe('TEST Account API', () => {
         });
 
     });
-    afterEach((next) => {
+    afterAll((next) => {
         mongoose.connection.dropDatabase().then(next)
         // Drop all exist user
         // User.collection.drop()
@@ -34,8 +34,8 @@ describe('TEST Account API', () => {
 
     it(`Account Register`, (next) => {
         axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'test',
+            email: 'test@gmail.com',
             password: '12345678a',
             passwordConfirm: '12345678a'
         }).then((response) => {
@@ -44,11 +44,8 @@ describe('TEST Account API', () => {
                 username: response.data.user.username
             }, function(err, user) {
                 expect(err).toBe(null);
-                expect(user.username).toBe('fred');
-                expect(user.email).toBe('fred@gmail.com');
-
-                // // Delete created user
-                // User.collection.drop();
+                expect(user.username).toBe('test');
+                expect(user.email).toBe('test@gmail.com');
                 next();
             })
         })
@@ -56,14 +53,14 @@ describe('TEST Account API', () => {
 
     it(`Create Account duplicate Register`, async (next) => {
         await axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'duplicate',
+            email: 'duplicate@gmail.com',
             password: '12345678a',
             passwordConfirm: '12345678a'
         })
         axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'duplicate',
+            email: 'duplicate@gmail.com',
             password: '12345678a',
             passwordConfirm: '12345678a'
         }).catch(function (error) {
@@ -138,14 +135,14 @@ describe('TEST Account API', () => {
     it(`Account authenticate with email`, async (next) => {
         // Create User
         let responseInfo = await axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'fred1',
+            email: 'fred1@gmail.com',
             password: '123456678a',
             passwordConfirm: '123456678a'
         });
 
         axios.post('http://localhost:8000/account/authenticate', {
-            email: "fred@gmail.com",
+            email: "fred1@gmail.com",
             password: "123456678a",
         }).then((response) => {
             expect(response.status).toBe(201);
@@ -157,14 +154,14 @@ describe('TEST Account API', () => {
     it(`Account authenticate with wrong username`, async (next) => {
         // Create User
         let responseInfo = await axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'fred2',
+            email: 'fred2@gmail.com',
             password: '123456678a',
             passwordConfirm: '123456678a'
         });
 
         axios.post('http://localhost:8000/account/authenticate', {
-            username: "fred1",
+            username: "frdsa",
             password: "123456678a",
         }).catch(function (error) {
             expect(error.response.status).toBe(401);
@@ -177,8 +174,8 @@ describe('TEST Account API', () => {
     it(`Account Information`, async (next) => {
         // Create User
         let response = await axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'fred3',
+            email: 'fred3@gmail.com',
             password: '123456678a',
             passwordConfirm: '123456678a',
             firstname: 'albert',
@@ -193,7 +190,7 @@ describe('TEST Account API', () => {
         }).then((response) => {
             expect(response.status).toBe(201);
             expect(response.data.success).toBe(true);
-            expect(response.data.user.username).toBe('fred');
+            expect(response.data.user.username).toBe('fred3');
             expect(response.data.user.firstName).toBe('albert');
             expect(response.data.user.lastName).toBe('fred');
             expect(response.data.user.avatar).toBe('http://test_avatar.jpg');
@@ -204,8 +201,8 @@ describe('TEST Account API', () => {
     it(`Update Profile`, async (next) => {
         // Create User
         let response = await axios.post('http://localhost:8000/account/register', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'fred4',
+            email: 'fred4@gmail.com',
             password: '123456678a',
             passwordConfirm: '123456678a',
             firstname: 'albert',
@@ -214,8 +211,8 @@ describe('TEST Account API', () => {
         })
 
         let result = await axios.post('http://localhost:8000/account/update', {
-            username: 'fred',
-            email: 'fred@gmail.com',
+            username: 'fred4',
+            email: 'fred4@gmail.com',
             password: '123456678a',
             newPassword: '123456abcd',
             passwordConfirm: '123456abcd',
@@ -235,7 +232,7 @@ describe('TEST Account API', () => {
         }).then((response) => {
             expect(response.status).toBe(201);
             expect(response.data.success).toBe(true);
-            expect(response.data.user.username).toBe('fred');
+            expect(response.data.user.username).toBe('fred4');
             expect(response.data.user.firstName).toBe('albertUpdated');
             expect(response.data.user.lastName).toBe('fredUpdated');
             expect(response.data.user.avatar).toBe('http://test_avatar.jpg');

@@ -23,6 +23,16 @@ module.exports = class Room extends EventEmitter {
 
         this.connections = new ConnectionManager();
         this.userCount = 0;
+
+        this.getListUsers = this.getListUsers.bind(this);
+        this.getListUserIds = this.getListUserIds.bind(this);
+        this.getListUsernames = this.getListUsernames.bind(this);
+        this.containsUser = this.containsUser.bind(this);
+
+        this.emitUserJoin = this.emitUserJoin.bind(this);
+        this.emitUserLeave = this.emitUserLeave.bind(this);
+        this.addConnection = this.addConnection.bind(this);
+        this.removeConnection = this.removeConnection.bind(this);
     }
     getListUsers() {
         return this.connections.getUsers();
@@ -34,7 +44,7 @@ module.exports = class Room extends EventEmitter {
         return this.connections.getUsernames();
     }
     containsUser(userId) {
-        return this.getUserIds().indexOf(userId) !== -1;
+        return this.getListUserIds().indexOf(userId) !== -1;
     }
     emitUserJoin(data) {
         this.userCount++;

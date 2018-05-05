@@ -1,8 +1,9 @@
 'use strict';
 
-const mongoose = require('mongoose');
 const _ = require('lodash');
 const util = require('util');
+const Room          = require('./../db/schema/room');
+const User          = require('./../db/schema/user');
 
 const EventEmitter = require('events');
 // const helpers = require('./helpers');
@@ -32,8 +33,6 @@ module.exports = class RoomController extends EventEmitter {
         super();
     }
     createRoom(options, cb) {
-        let Room = mongoose.model('Room');
-
         Room.create(options, (err, room) => {
             if (err) {
                 return cb(err);
@@ -73,14 +72,11 @@ module.exports = class RoomController extends EventEmitter {
             .uniq()
             .value();
 
-        var User = mongoose.model('User');
         User.find({
             username: { $in: participants }
         }, cb);
     }
     updateRoom (roomId, options, cb) {
-        let Room = mongoose.model('Room');
-
         Room.findById(roomId, (err, room) => {
             if (err) {
                 // Oh noes, a bad thing happened!
@@ -144,8 +140,6 @@ module.exports = class RoomController extends EventEmitter {
         });
     }
     archive(roomId, cb) {
-        var Room = mongoose.model('Room');
-
         Room.findById(roomId, (err, room) => {
             if (err) {
                 console.error(err);
@@ -177,8 +171,6 @@ module.exports = class RoomController extends EventEmitter {
             },
             maxTake: 5000
         });
-
-        let Room = mongoose.model('Room');
 
         let findQuery = Room.find({
             archived: { $ne: true },
@@ -266,7 +258,6 @@ module.exports = class RoomController extends EventEmitter {
         this.findOne(options, cb);
     }
     findOne(options, cb) {
-        var Room = mongoose.model('Room');
         Room.findOne(options.criteria)
             .populate('participants').exec((err, room) => {
 

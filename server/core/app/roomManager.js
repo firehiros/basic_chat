@@ -2,33 +2,54 @@
 'use strict';
 
 const EventEmitter = require('events');
+const Room = require('./room');
 
 module.exports = class RoomManager extends EventEmitter {
     constructor(options){
         super();
-        this.users = {};
+        this.rooms = {};
+
+        this.get = this.get.bind(this);
+        this.getOrAdd = this.getOrAdd.bind(this);
+
+        this.onJoin = this.onJoin.bind(this);
+        this.onLeave = this.onLeave.bind(this);
     }
-    get(userId) {
-        return this.users[userId];
+    get(roomId) {
+        roomId = roomId.toString();
+        return this.rooms[roomId];
     }
-    getByUsername(username) {
-        return _.find(this.users, function(user) {
-            return user.username === username;
+    slug(slug) {
+        return _.find(this.rooms, function(room) {
+            return room.roomSlug === slug;
         });
     }
-    getOrAdd (user) {
-        var user2 = typeof user.toJSON === 'function' ? user.toJSON() : user;
-        var userId= user2.id.toString();
-        if (!this.users[userId]) {
-            _.assign(user2, { id: userId });
-            this.users[userId] = user2;
-            this.core.avatars.add(user);
+    getOrAdd(room) {
+        var roomId = room._id.toString();
+        var pRoom = this.rooms[roomId];
+        if (!pRoom) {
+            pRoom = this.rooms[roomId] = new Room({
+                room: room
+            });
+            pRoom.on('user_join', this.onJoin);
+            pRoom.on('user_leave', this.onLeave);
         }
-        return this.users[userId];
+        return pRoom;
     }
-    remove(user) {
-        user = typeof user.toJSON === 'function' ? user.toJSON() : user;
-        var userId = typeof user === 'object' ? user.id.toString() : user;
-        delete this.users[userId];
+    onJoin(data) {
+        this.emit('user_join', data);
+    }
+    onLeave(data) {
+        this.emit('user_leave', data);
+    }
+    usernameChanged(data) {
+        Object.keys(this.rooms).forEach(function(key) {
+            this.rooms[key].usernameChanged(data);
+        }, this);
+    }
+    removeConnection(connection) {
+        Object.keys(this.rooms).forEach(function(key) {
+            this.rooms[key].removeConnection(connection);
+        }, this);
     }
 }
