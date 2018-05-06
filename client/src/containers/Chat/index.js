@@ -20,8 +20,8 @@ let {
     onSelectUser,
     submitComment,
     updateMessageValue,
-    updateSearchChatUser,
-    userInfoState
+    userInfoState,
+    requestUsers
 } = ChatAction;
 
 class ChatPanelWithRedux extends Component {
@@ -60,59 +60,59 @@ class ChatPanelWithRedux extends Component {
     Communication = () => {
         const {message, selectedUser, conversation} = this.props;
         const {conversationData} = conversation;
-        return <div className="chat-main">
-            <div className="chat-main-header">
-                <IconButton className="d-block d-xl-none chat-btn" aria-label="Menu"
-                            onClick={this.onChatToggleDrawer.bind(this)}>
-                    <i className="zmdi zmdi-comment-text"/>
-                </IconButton>
-                <div className="chat-main-header-info">
+        return (
+            <div className="chat-main">
+                <div className="chat-main-header">
+                    <IconButton className="d-block d-xl-none chat-btn" aria-label="Menu"
+                                onClick={this.onChatToggleDrawer.bind(this)}>
+                        <i className="zmdi zmdi-comment-text"/>
+                    </IconButton>
+                    <div className="chat-main-header-info">
 
-                    <div className="chat-avatar mr-2">
-                        <div className="chat-avatar-mode">
-                            <img src={selectedUser.thumb}
-                                 className="rounded-circle size-60"
-                                 alt=""/>
+                        <div className="chat-avatar mr-2">
+                            <div className="chat-avatar-mode">
+                                <img src={selectedUser.avatar}
+                                     className="rounded-circle size-60"
+                                     alt=""/>
+                            </div>
+                        </div>
 
-                            <span className={`chat-mode ${selectedUser.status}`}/>
+                        <div className="chat-contact-name">
+                            {selectedUser.name}
                         </div>
                     </div>
 
-                    <div className="chat-contact-name">
-                        {selectedUser.name}
-                    </div>
                 </div>
 
-            </div>
+                <div className="chat-list-scroll">
+                    <Conversation conversationData={conversationData}
+                                  selectedUser={selectedUser}/>
+                </div>
 
-            <div className="chat-list-scroll">
-                <Conversation conversationData={conversationData}
-                              selectedUser={selectedUser}/>
-            </div>
-
-            <div className="chat-main-footer">
-                <div className="d-flex flex-row align-items-center" style={{maxHeight: 51}}>
-                    <div className="col">
-                        <div className="form-group">
-                            <textarea
-                                id="required" className="border-0 form-control chat-textarea"
-                                onKeyUp={this._handleKeyPress.bind(this)}
-                                onChange={this.updateMessageValue.bind(this)}
-                                value={message}
-                                placeholder="Type and hit enter to send message"
-                            />
+                <div className="chat-main-footer">
+                    <div className="d-flex flex-row align-items-center" style={{maxHeight: 51}}>
+                        <div className="col">
+                            <div className="form-group">
+                                <textarea
+                                    id="required" className="border-0 form-control chat-textarea"
+                                    onKeyUp={this._handleKeyPress.bind(this)}
+                                    onChange={this.updateMessageValue.bind(this)}
+                                    value={message}
+                                    placeholder="Type and hit enter to send message"
+                                />
+                            </div>
+                        </div>
+                        <div className="chat-sent">
+                            <IconButton
+                                onClick={this.submitComment.bind(this)}
+                                aria-label="Send message">
+                                <i className="zmdi  zmdi-mail-send"/>
+                            </IconButton>
                         </div>
                     </div>
-                    <div className="chat-sent">
-                        <IconButton
-                            onClick={this.submitComment.bind(this)}
-                            aria-label="Send message">
-                            <i className="zmdi  zmdi-mail-send"/>
-                        </IconButton>
-                    </div>
                 </div>
             </div>
-        </div>
+        )
     };
 
     AppUsersInfo = () => {
@@ -138,12 +138,10 @@ class ChatPanelWithRedux extends Component {
                 </div>
             </div>
             <div className="chat-sidenav-content">
-
                 <div className="chat-sidenav-scroll card p-4">
                     <form>
                         <div className="form-group mt-4">
                             <label>Mood</label>
-
                             <Input
                                 fullWidth
                                 id="exampleTextarea"
@@ -162,7 +160,8 @@ class ChatPanelWithRedux extends Component {
             </div>
         </div>
     };
-    ChatUsers = () => {
+
+    ChatUsersView = () => {
         return <div className="chat-sidenav-main">
             <div className="chat-sidenav-header">
 
@@ -173,23 +172,13 @@ class ChatPanelWithRedux extends Component {
                     }}>
                         <div className="chat-avatar-mode">
                             <img id="user-avatar-button" src="http://via.placeholder.com/256x256"
-                                 className="rounded-circle size-50"
-                                 alt=""/>
-                            <span className="chat-mode online"/>
+                                 className="rounded-circle size-50" alt=""/>
                         </div>
                     </div>
 
                     <IconButton>
                         <i className="zmdi zmdi-more-vert"/>
                     </IconButton>
-                </div>
-
-                <div className="search-wrapper">
-
-                    <SearchBox placeholder="Search or start new chat"
-                               onChange={this.updateSearchChatUser.bind(this)}
-                               value={this.props.searchChatUser}/>
-
                 </div>
             </div>
 
@@ -203,18 +192,11 @@ class ChatPanelWithRedux extends Component {
                                       selectedSectionId={this.props.selectedSectionId}
                                       onSelectUser={this.onSelectUser.bind(this)}/>
                     }
-                    <div className="chat-sidenav-title">Contacts</div>
-                    {this.props.contactList.length === 0 ?
-                        <div className="pl-3">{this.props.userNotFound}</div>
-                        :
-                        <ContactList contactList={this.props.contactList}
-                                     selectedSectionId={this.props.selectedSectionId}
-                                     onSelectUser={this.onSelectUser.bind(this)}/>
-                    }
                 </div>
             </div>
         </div>
     };
+
     showCommunication = () => {
         return (
             <div className="chat-box">
@@ -229,7 +211,8 @@ class ChatPanelWithRedux extends Component {
                         </div>
                         : this.Communication()}
                 </div>
-            </div>)
+            </div>
+        )
     };
 
     constructor() {
@@ -245,6 +228,9 @@ class ChatPanelWithRedux extends Component {
 
     componentDidMount() {
         this.manageHeight()
+        if(this.props.userToken){
+            this.props.requestUsers(this.props.userToken)
+        }
     }
 
     manageHeight() {
@@ -315,12 +301,6 @@ class ChatPanelWithRedux extends Component {
         }
     }
 
-    updateSearchChatUser(evt) {
-        this.props.updateSearchChatUser(evt.target.value);
-        this.props.filterContacts(evt.target.value);
-        this.props.filterUsers(evt.target.value);
-    }
-
     onChatToggleDrawer() {
         this.props.onChatToggleDrawer();
     }
@@ -336,11 +316,11 @@ class ChatPanelWithRedux extends Component {
                                     type="temporary"
                                     open={drawerState}
                                     onClose={this.onChatToggleDrawer.bind(this)}>
-                                {userState === 1 ? this.ChatUsers() : this.AppUsersInfo()}
+                                {userState === 1 ? this.ChatUsersView() : this.AppUsersInfo()}
                             </Drawer>
                         </div>
                         <div className="chat-sidenav d-none d-xl-flex">
-                            {userState === 1 ? this.ChatUsers() : this.AppUsersInfo()}
+                            {userState === 1 ? this.ChatUsersView() : this.AppUsersInfo()}
                         </div>
                         {loader ?
                             <div className="w-100 d-flex justify-content-center align-items-center chat-loader-view">
@@ -354,7 +334,7 @@ class ChatPanelWithRedux extends Component {
     }
 }
 
-const mapStateToProps = ({chat}) => {
+const mapStateToProps = state => {
     const {
         loader,
         userNotFound,
@@ -366,9 +346,8 @@ const mapStateToProps = ({chat}) => {
         selectedUser,
         message,
         chatUsers,
-        conversationList,
         conversation
-    } = chat;
+    } = state.chat;
     return {
         loader,
         userNotFound,
@@ -380,8 +359,8 @@ const mapStateToProps = ({chat}) => {
         selectedUser,
         message,
         chatUsers,
-        conversationList,
-        conversation
+        conversation,
+        userToken: state.auth.userToken
     }
 };
 
@@ -393,6 +372,6 @@ export default connect(mapStateToProps, {
     userInfoState,
     submitComment,
     updateMessageValue,
-    updateSearchChatUser,
-    onChatToggleDrawer
+    onChatToggleDrawer,
+    requestUsers
 })(ChatPanelWithRedux);

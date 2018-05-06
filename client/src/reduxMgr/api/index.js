@@ -1,4 +1,5 @@
 import axios from 'axios';
+import io from 'socket.io-client';
 
 var apiUrl = 'http://localhost:3000';
 
@@ -22,4 +23,30 @@ export const register = async (param) => {
         lastname
     })
     .catch(err => err);
+}
+
+export const getUsers = async (token) => {
+    return await axios.get(`${apiUrl}/users`, {
+        headers: {
+            'x-access-token': token
+        }
+    })
+    .catch(err => err);
+}
+
+export const connectSocket = (param) => {
+    let ioOptions = {
+        forceNew: true,
+        reconnection: false,
+        query: {
+            token: param.token
+        }
+    }
+    // connect two io clients
+    const socket = io('http://localhost:3000', ioOptions);
+    return new Promise(resolve => {
+        socket.on('connect', () => {
+            resolve(socket);
+        });
+    });
 }

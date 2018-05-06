@@ -5,11 +5,19 @@ export const FIXED_DRAWER = 'fixed_drawer';
 export const COLLAPSED_DRAWER = 'collapsible';
 export const MINI_DRAWER = 'mini_drawer';
 
+// Connect
+export const REQUEST_CONNECT = 'REQUEST_CONNECT';
+
 // Chat Module const
-export const FILTER_USERS = 'filter_users';
-export const ON_SELECT_USER = 'on_select_user';
-export const ON_HIDE_LOADER = 'on_hide_loader';
-export const USER_INFO_STATE = 'user_info_state';
-export const SUBMIT_COMMENT = 'submit_comment';
-export const UPDATE_MESSAGE_VALUE = 'update_message_value';
-export const UPDATE_SEARCH_CHAT_USER = 'update_search_chat_user';
+export const REQUEST_USERS = 'REQUEST_USERS';
+export const REQUEST_USERS_SUCCESS = 'REQUEST_USERS_SUCCESS';
+export const REQUEST_USERS_FAIL = 'REQUEST_USERS_FAIL';
+export const REQUEST_CONVERSATION = 'REQUEST_CONVERSATION';
+export const REQUEST_CONVERSATION_SUCCESS = 'REQUEST_CONVERSATION_SUCCESS';
+export const REQUEST_CONVERSATION_FAIL = 'REQUEST_CONVERSATION_FAIL';
+export const ON_SELECT_USER = 'ON_SELECT_USER';
+export const ON_HIDE_LOADER = 'ON_HIDE_LOADER';
+export const USER_INFO_STATE = 'USER_INFO_STATE';
+export const SUBMIT_COMMENT = 'SUBMIT_COMMENT';
+export const UPDATE_MESSAGE_VALUE = 'UPDATE_MESSAGE_VALUE';
+export const UPDATE_SEARCH_CHAT_USER = 'UPDATE_SEARCH_CHAT_USER';

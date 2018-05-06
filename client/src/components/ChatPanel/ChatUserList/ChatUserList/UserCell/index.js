@@ -8,14 +8,13 @@ const UserCell = ({chat, selectedSectionId, onSelectUser}) => {
             <div className="chat-user-row row">
                 <div className="chat-avatar col-xl-2 col-3">
                     <div className="chat-avatar-mode">
-                        <img src={chat.thumb} className="rounded-circle size-50" alt={chat.name}/>
-                        <span className={`chat-mode ${chat.status}`}/>
+                        <img src={chat.avatar ? chat.avatar : 'http://via.placeholder.com/256x256'} className="rounded-circle size-50" alt={chat.username}/>
                     </div>
                 </div>
 
+
                 <div className="chat-info col-xl-8 col-6">
-                    <span className="name h4">{chat.name}</span>
-                    <div className="chat-info-des">{chat.lastMessage.substring(0, 30) + "..."}</div>
+                    <span className="name h4">{chat.firstName} {chat.lastName} ({chat.username})</span>
                 </div>
 
                 <div className="chat-date col-xl-2 col-3">

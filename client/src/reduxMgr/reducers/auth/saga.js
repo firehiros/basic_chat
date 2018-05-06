@@ -7,7 +7,7 @@ import { login, register } from 'api/index';
 
 const fakeApiCall = true; // auth0 or express JWT
 
-export function* loginRequest() {
+function* loginRequest() {
     yield takeEvery('LOGIN_REQUEST', function*(param) {
         try {
             let res = yield call(
@@ -54,7 +54,7 @@ export function* loginRequest() {
     });
 }
 
-export function* registerRequest() {
+function* registerRequest() {
     yield takeEvery('REGISTER_REQUEST', function*(param) {
         try {
             let res = yield call(
@@ -91,13 +91,13 @@ export function* registerRequest() {
     });
 }
 
-export function* logout() {
+function* logout() {
     yield takeEvery(actions.LOGOUT, function*() {
         clearToken();
         yield put(push('/'));
     });
 }
-export function* checkAuthorization() {
+function* checkAuthorization() {
     yield takeEvery(actions.CHECK_AUTHORIZATION, function*() {
         const token = getToken().get('idToken');
         if (token) {
