@@ -9,10 +9,9 @@ import {
     ON_TOGGLE_DRAWER,
     SUBMIT_COMMENT,
     UPDATE_MESSAGE_VALUE,
-    UPDATE_SEARCH_CHAT_USER
+    UPDATE_SEARCH_CHAT_USER,
+    USER_INFO_STATE
 } from "constants/ActionTypes";
-
-import {USER_INFO_STATE} from "constants/ActionTypes";
 
 
 const INIT_STATE = {

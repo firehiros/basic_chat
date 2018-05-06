@@ -11,63 +11,43 @@ import {
 } from "constants/ActionTypes";
 
 
-export const filterContacts = (userName) => {
-    return {
+const actions = {
+    filterContacts: (userName) => ({
         type: FILTER_CONTACT,
         payload: userName
-    };
-};
-
-export const filterUsers = (userName) => {
-    return {
+    }),
+    filterUsers: (userName) => ({
         type: FILTER_USERS,
         payload: userName
-    };
-};
-
-
-export const onSelectUser = (user) => {
-    return {
+    }),
+    onSelectUser: (user) => ({
         type: ON_SELECT_USER,
         payload: user
-    };
-};
-
-export const submitComment = () => {
-    return {
-        type: SUBMIT_COMMENT,
-    };
-};
-
-export const hideLoader = () => {
-    return {
-        type: ON_HIDE_LOADER,
-    };
-};
-
-export const userInfoState = (state) => {
-    return {
+    }),
+    submitComment: () => ({
+        type: SUBMIT_COMMENT
+    }),
+    hideLoader: () => ({
+        type: ON_HIDE_LOADER
+    }),
+    onChatToggleDrawer: () => ({
+        type: ON_TOGGLE_DRAWER
+    }),
+    onSelectUser: (user) => ({
+        type: ON_SELECT_USER,
+        payload: user
+    }),
+    userInfoState: (state) => ({
         type: USER_INFO_STATE,
         payload: state
-    };
-};
-
-export const updateMessageValue = (message) => {
-    return {
+    }),
+    updateMessageValue: (message) => ({
         type: UPDATE_MESSAGE_VALUE,
         payload: message
-    };
-};
-
-
-export const updateSearchChatUser = (userName) => {
-    return {
+    }),
+    updateSearchChatUser: (userName) => ({
         type: UPDATE_SEARCH_CHAT_USER,
         payload: userName
-    };
+    }),
 };
-export const onChatToggleDrawer = () => {
-    return {
-        type: ON_TOGGLE_DRAWER
-    };
-};
+export default actions;

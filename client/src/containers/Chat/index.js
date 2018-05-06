@@ -10,7 +10,9 @@ import ChatUserList from "components/ChatPanel/ChatUserList/ChatUserList";
 import Conversation from "components/ChatPanel/ChatUserList/Conversation/index";
 import ContactList from "components/ChatPanel/ChatUserList/ContactList/index";
 import SearchBox from "components/SearchBox";
-import {
+
+import ChatAction from 'reducers/chat/actions'
+let {
     filterContacts,
     filterUsers,
     hideLoader,
@@ -20,7 +22,7 @@ import {
     updateMessageValue,
     updateSearchChatUser,
     userInfoState
-} from 'reducers/chat/actions'
+} = ChatAction;
 
 class ChatPanelWithRedux extends Component {
     filterContacts = (userName) => {
@@ -352,7 +354,7 @@ class ChatPanelWithRedux extends Component {
     }
 }
 
-const mapStateToProps = ({chatData}) => {
+const mapStateToProps = ({chat}) => {
     const {
         loader,
         userNotFound,
@@ -366,7 +368,7 @@ const mapStateToProps = ({chatData}) => {
         chatUsers,
         conversationList,
         conversation
-    } = chatData;
+    } = chat;
     return {
         loader,
         userNotFound,

@@ -8,7 +8,7 @@ import ChatReducer from './chat/reducer';
 const reducers = combineReducers({
     routing: routerReducer,
     auth: AuthReducer,
-    setting: SettingReducer,
+    settings: SettingReducer,
     chat: ChatReducer
 });
 

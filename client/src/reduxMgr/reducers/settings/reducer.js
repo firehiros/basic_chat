@@ -8,6 +8,11 @@ const initState = {
 
 export default function appReducer(state = initState, action) {
     switch (action.type) {
+        case '@@router/LOCATION_CHANGE':
+            return {
+                ...state,
+                navCollapsed: false
+            };
         case TOGGLE_COLLAPSED_NAV:
             return {
                 ...state,

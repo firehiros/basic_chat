@@ -1,13 +1,23 @@
 import React from 'react';
 import { Router,hashHistory } from 'react-router';
+// import {createMuiTheme, MuiThemeProvider} from 'material-ui/styles';
+// import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import {Redirect, Switch, Route, withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
-import {toggleCollapsedNav} from 'reducers/settings/actions';
+
+// Load Actions
+import SettingActions from 'reducers/settings/actions';
+
+// Load style
+import indigoTheme from 'constants/themes/indigoTheme';
 
 import Header from 'components/Header/index';
 import Sidebar from 'containers/SideNav/index';
 import Footer from 'components/Footer';
 import Chat from 'containers/Chat';
+
+import 'styles/bootstrap.scss'
+import 'styles/app.scss';
 // import Volume from 'containers/Volume';
 // import RateList from 'containers/RateList';
 
@@ -22,6 +32,7 @@ class App extends React.Component {
 
     render() {
         const {match, drawerType} = this.props;
+        // let theme = createMuiTheme(indigoTheme);
         const drawerStyle = drawerType.includes(FIXED_DRAWER) ? "fixed-drawer" : drawerType.includes(COLLAPSED_DRAWER) ? "collapsible-drawer" : "mini-drawer";
 
         //set default height and overflow for iOS mobile Safari 10+ support.
@@ -33,29 +44,24 @@ class App extends React.Component {
         }
 
         return (
-            <div className="app-main">
-            </div>
+                <div className={`app-main`}>
+                    <div className={`app-container ${drawerStyle}`}>
+                        <div className="app-main-container">
+                            <main className="app-main-content-wrapper">
+                                <div className="app-main-content" width="100%">
+                                    <Chat />
+                                </div>
+                                <Footer/>
+                            </main>
+                        </div>
+                    </div>
+                </div>
         );
     }
 }
 
-    // <div className={`app-container ${drawerStyle}`}>
-    //     <div className="app-main-container">
-    //         <div className="app-header">
-    //             <Header drawerType={drawerType} onToggleCollapsedNav={this.onToggleCollapsedNav}/>
-    //         </div>
-    //         <main className="app-main-content-wrapper">
-    //             <div className="app-main-content" width="100%">
-    //                 <Route path={`${match.url}chat`} component={Chat}/>
-    //                 // <Route path={`${match.url}volume`} component={Volume}/>
-    //                 // <Route path={`${match.url}ratelist`} component={RateList}/>
-    //             </div>
-    //         </main>
-    //         <Footer/>
-    //     </div>
-    // </div>
 const mapStateToProps = ({settings}) => {
     const {navCollapsed, drawerType} = settings;
     return {navCollapsed, drawerType}
 };
-export default withRouter(connect(mapStateToProps, {toggleCollapsedNav})(App));
+export default withRouter(connect(mapStateToProps, {toggleCollapsedNav: SettingActions.toggleCollapsedNav})(App));

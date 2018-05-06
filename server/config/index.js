@@ -41,7 +41,7 @@ let init = () => {
 		return Object.assign({
 			db: 'mongodb://localhost/exchange_dev',
 			http: {
-				port: 8080,
+				port: 3000,
 				enable: true
 			},
 			https:{

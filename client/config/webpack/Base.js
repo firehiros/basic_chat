@@ -97,7 +97,7 @@ class WebpackBaseConfig {
                         include: this.srcPathAbsolute,
                         loader: 'babel-loader',
                         query: {
-                            presets: ['es2015', 'react', 'stage-2', 'stage-0']
+                            presets: ['es2015', 'react', 'stage-2']
                         }
 
                     },
@@ -146,6 +146,27 @@ class WebpackBaseConfig {
                         ]
                     },
                     {
+                        test: /\.cssmodule\.less$/,
+                        loaders: [
+                            {loader: 'style-loader'},
+                            {
+                                loader: 'css-loader',
+                                query: cssModulesQuery
+                            },
+                            {loader: 'less-loader'}
+                        ]
+                    },
+                    {
+                        test: /\.cssmodule\.styl$/,
+                        loaders: [
+                            {loader: 'style-loader'},
+                            {
+                                loader: 'css-loader',
+                                query: cssModulesQuery
+                            },
+                            {loader: 'stylus-loader'}
+                        ]
+                    }, {
                         test: /\.js?$/,
                         exclude: /node_modules/,
                         use: {
@@ -166,16 +187,14 @@ class WebpackBaseConfig {
             plugins: [],
             resolve: {
                 alias: {
-                    // api: `${this.srcPathAbsolute}/api/`,
-                    assets: `${this.srcPathAbsolute}/assets/`,
-                    components: `${this.srcPathAbsolute}/components/`,
-                    helper: `${this.srcPathAbsolute}/helpers/`,
-                    constants: `${this.srcPathAbsolute}/constants`,
-                    containers: `${this.srcPathAbsolute}/containers/`,
-                    // config: `${this.srcPathAbsolute}/config/${this.env}.js`,
-                    reducers: `${this.srcPathAbsolute}/reduxMgr/reducers/`,
-                    // store: `${this.srcPathAbsolute}/store/`,
-                    styles: `${this.srcPathAbsolute}/styles/`
+                    assets      : `${this.srcPathAbsolute}/assets/`,
+                    components  : `${this.srcPathAbsolute}/components/`,
+                    helper      : `${this.srcPathAbsolute}/helpers/`,
+                    constants   : `${this.srcPathAbsolute}/constants`,
+                    containers  : `${this.srcPathAbsolute}/containers/`,
+                    reducers    : `${this.srcPathAbsolute}/reduxMgr/reducers/`,
+                    api         : `${this.srcPathAbsolute}/reduxMgr/api/`,
+                    styles      : `${this.srcPathAbsolute}/styles/`
                 },
                 extensions: ['.js', '.jsx'],
                 modules: [

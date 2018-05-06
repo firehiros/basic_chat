@@ -29,14 +29,17 @@ module.exports = function() {
         // req.io.route('account:login');
 
         var fields = req.body || req.data;
-        User.authenticate(fields.username || fields.email, fields.password, (err, user, isMatch) => {
+        let identifier = fields.username || fields.email || fields.indentifier;
+        if (!identifier || !fields.password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Authentication failed. Credentials is incorrect.'
+            });
+        }
+        User.authenticate(identifier, fields.password, (err, user, isMatch) => {
             if (err) {
                 console.log(err);
-                return res.status(400).json({
-                    status: 'error',
-                    message: 'Sorry, we could not process your request.',
-                    error: err
-                });
+                return res.status(400).json(err);
             }
             if (!user) {
                 res.status(401).json({
@@ -72,7 +75,6 @@ module.exports = function() {
 
         if (fields.password !== passwordConfirm) {
             return res.status(400).json({
-                status: 'error',
                 message: 'Password not confirmed'
             });
         }
@@ -90,16 +92,11 @@ module.exports = function() {
         User.create(data, function(err, user) {
             if (err) {
                 console.log(err);
-                return res.status(400).json({
-                    status: 'error',
-                    message: 'Sorry, we could not process your request.',
-                    error: err
-                });
+                return res.status(400).json(err);
             }
             let token = user.generateToken();
 
             res.status(201).json({
-                status: 'success',
                 message: 'You\'ve been registered, please try logging in now!',
                 token: token,
                 user: user
@@ -149,7 +146,6 @@ module.exports = function() {
 
         if (data.newPassword && data.newPassword !== data.passwordConfirm) {
             return res.status(400).json({
-                status: 'error',
                 message: 'Password not confirmed'
             });
         }
@@ -158,7 +154,6 @@ module.exports = function() {
             if (err) {
                 console.log(err);
                 return res.status(401).json({
-                    status: 'error',
                     message: 'There were problems authenticating you.',
                     error: err
                 });
@@ -178,12 +173,13 @@ module.exports = function() {
                 } else {
 
                     User.updateProfile(userId, data, function (err, user, reason) {
-                        if (err || !user) {
-                            return res.status(400).json({
-                                status: 'error',
-                                message: 'Unable to update your account.',
-                                reason: reason,
-                                error: err
+                        if (err) {
+                            return res.status(400).json(err);
+                        }
+                        if (!user) {
+                            res.status(401).json({
+                                success: false,
+                                message: 'Authentication failed. User not found.'
                             });
                         }
                         let token = user.generateToken();
