@@ -54,6 +54,11 @@ export default function authReducer(state = initState, action) {
             }
         case actions.LOGOUT:
             return initState;
+        case actions.CLEAR_NOTIFY:
+            return {
+                ...state,
+                notify: null
+            }
         default:
             return state;
     }

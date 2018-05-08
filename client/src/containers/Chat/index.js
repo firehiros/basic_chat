@@ -82,7 +82,6 @@ class ChatPanelWithRedux extends Component {
             NotificationManager.error(error.message, 'Error');
         });
         socket.on('chat-messages:new', (res) => {
-            console.log(res.message);
             this.props.submitCommentSuccess(res);
             if(res.message.owner !== this.props.userInfo.id){
                 NotificationManager.info('You have received new messages', 'Message');
@@ -90,7 +89,6 @@ class ChatPanelWithRedux extends Component {
             // that.addMessage(message);
         });
         socket.on('messages:new', (message) => {
-            console.log(message);
             NotificationManager.info('You have received new messages', 'Message');
             // that.addMessage(message);
         });
@@ -214,7 +212,7 @@ class ChatPanelWithRedux extends Component {
                         </div>
 
                         <div className="chat-contact-name">
-                            {selectedUser.firstName} {selectedUser.lastName}
+                            {selectedUser.firstName && selectedUser.lastName ? `${selectedUser.firstName}  ${selectedUser.lastName}` : selectedUser.username}
                         </div>
                     </div>
 
@@ -270,7 +268,9 @@ class ChatPanelWithRedux extends Component {
                              className="avatar rounded-circle size-60 huge" alt="John Doe"/>
                     </div>
 
-                    <div className="user-name h4 my-2 text-white">Robert Johnson</div>
+                    <div className="user-name h4 my-2 text-white">
+                        {this.props.userInfo.firstName && this.props.userInfo.lastName ? `${this.props.userInfo.firstName}  ${this.props.userInfo.lastName}` : this.props.userInfo.username}
+                    </div>
 
                 </div>
             </div>
@@ -316,7 +316,11 @@ class ChatPanelWithRedux extends Component {
                         </div>
                     </div>
                     <div className="module-user-info mr-auto d-flex flex-column justify-content-center">
-                        <div className="module-title"><h5 className="mb-0">{this.props.userInfo.firstName} {this.props.userInfo.lastName}</h5></div>
+                        <div className="module-title">
+                            <h5 className="mb-0">
+                                {this.props.userInfo.firstName && this.props.userInfo.lastName ? `${this.props.userInfo.firstName}  ${this.props.userInfo.lastName}` : this.props.userInfo.username}
+                            </h5>
+                        </div>
                         <div className="module-user-detail"><a href="javascript:void(0)" className="text-grey">{this.props.userInfo.email}</a></div>
                     </div>
 

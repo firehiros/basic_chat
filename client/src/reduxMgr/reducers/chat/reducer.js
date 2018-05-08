@@ -14,7 +14,8 @@ const initState = {
     message: '',
     userList: [],
     conversation: [],
-    error: null
+    error: null,
+    notify: null
 };
 
 export default function chatReducer(state = initState, action) {
@@ -103,6 +104,13 @@ export default function chatReducer(state = initState, action) {
         case actions.UPDATE_MESSAGE_VALUE: {
             return {...state, message: action.payload}
         }
+        case actions.CLEAR_NOTIFY: {
+            return {
+                ...state,
+                notify: null
+            }
+        }
+
         default:
             return state;
     }

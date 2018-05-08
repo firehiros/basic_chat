@@ -14,6 +14,7 @@ const actions = {
     SOCKET_STATE: 'SOCKET_STATE',
     SOCKET_FAIL: 'SOCKET_FAIL',
     DISCONNECT_SOCKET: 'DISCONNECT_SOCKET',
+    CLEAR_NOTIFY: 'CLEAR_NOTIFY',
     checkAuthorization: () => ({
         type: actions.CHECK_AUTHORIZATION
     }),
@@ -48,14 +49,6 @@ const actions = {
         type: actions.VERIFY_TOKEN_REQUEST,
         payload: param
     }),
-    // verifyTokenSuccess: (payload) => ({
-    //     type: actions.VERIFY_TOKEN_SUCCESS,
-    //     payload
-    // }),
-    // verifyTokenFail: (error) => ({
-    //     type: actions.VERIFY_TOKEN_FAIL,
-    //     error
-    // }),
     connectSocket: (payload) => ({
         type: actions.CONNECT_SOCKET,
         param: payload
@@ -74,6 +67,9 @@ const actions = {
     authenticate: (param) => ({
         type: actions.CHECK_AUTHORIZATION,
         payload: param
+    }),
+    clearNotify: () => ({
+        type: actions.CLEAR_NOTIFY
     })
 };
 export default actions;

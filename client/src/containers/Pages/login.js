@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import authAction from 'reducers/auth/actions';
 import 'react-notifications/src/notifications.scss';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 
@@ -10,6 +9,9 @@ import Checkbox from 'material-ui/Checkbox';
 import Button from 'material-ui/Button';
 import {FormControlLabel} from 'material-ui/Form';
 
+import AuthActions from 'reducers/auth/actions';
+
+let {login, clearNotify} = AuthActions;
 class Login extends Component{
     state = {
         isLoggedIn: false,
@@ -51,6 +53,8 @@ class Login extends Component{
     }
     handleNotification = () => {
         let notify = this.state.notify;
+            if(!notify)
+                return;
 
         NotificationManager.error(notify.message, 'Login Fail');
         if(notify.error && notify.error.errors){
@@ -62,7 +66,7 @@ class Login extends Component{
                 }
             })
         }
-
+        this.props.clearNotify();
         this.setState({ isShowNotification: false });
     }
     render() {
@@ -127,4 +131,4 @@ const mapStateToProps = state => ({
     isLoggedIn: state.auth.userToken !== null,
     notify: state.auth.notify
 });
-export default connect(mapStateToProps, { login: authAction.login } )(Login);
+export default connect(mapStateToProps, {login, clearNotify} )(Login);

@@ -15,6 +15,7 @@ const actions = {
     UPDATE_MESSAGE_VALUE : 'UPDATE_MESSAGE_VALUE',
     UPDATE_SEARCH_CHAT_USER : 'UPDATE_SEARCH_CHAT_USER',
     QUIT_CHAT : 'QUIT_CHAT',
+    CLEAR_NOTIFY: 'CLEAR_NOTIFY',
     hideLoader: () => ({
         type: actions.ON_HIDE_LOADER
     }),
@@ -76,5 +77,8 @@ const actions = {
     quitChat: () => ({
         type: actions.QUIT_CHAT
     }),
+    clearNotify: () => ({
+        type: actions.CLEAR_NOTIFY
+    })
 };
 export default actions;

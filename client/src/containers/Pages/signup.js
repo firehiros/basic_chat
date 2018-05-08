@@ -8,6 +8,10 @@ import authAction from 'reducers/auth/actions';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 
+import AuthActions from 'reducers/auth/actions';
+
+let {register, clearNotify} = AuthActions;
+
 class Signup extends Component{
     state = {
         isLoggedIn: false,
@@ -53,8 +57,10 @@ class Signup extends Component{
     }
     handleNotification = () => {
         let notify = this.state.notify;
-        if(notify.success){
+        if(!notify) return;
 
+        if(notify.success){
+            // TODO show success notify
         } else {
             NotificationManager.error(notify.message, 'Register Fail');
             if(notify.error && notify.error.errors){
@@ -68,6 +74,7 @@ class Signup extends Component{
             }
 
         }
+        this.props.clearNotify();
 
         this.setState({ isShowNotification: false });
     }
@@ -174,4 +181,4 @@ const mapStateToProps = state => {
         notify: state.auth.notify
     });
 }
-export default connect(mapStateToProps, { register: authAction.register } )(Signup);
+export default connect(mapStateToProps, { register , clearNotify } )(Signup);
