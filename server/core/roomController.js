@@ -131,7 +131,7 @@ module.exports = class RoomController extends EventEmitter {
             }
 
             if (!room) {
-                return cb();
+                return cb(null, null);
             }
 
             room.canJoin(options, (err, canJoin) => {
@@ -236,7 +236,6 @@ module.exports = class RoomController extends EventEmitter {
             _id: identifier,
             archived: { $ne: true }
         };
-
         this.findOne(options, cb);
     }
     getRoomBySlug(options, cb) {

@@ -184,6 +184,7 @@ UserSchema.methods.comparePassword = function(password, cb) {
 
 UserSchema.statics.authenticate = function(identifier, password, cb) {
     this.findByIdentifier(identifier, function(err, user) {
+        console.log(err);
         if (err) {
             return cb(err);
         }
@@ -262,6 +263,7 @@ UserSchema.plugin(uniqueValidator);
 UserSchema.method('toJSON', function() {
     return {
         id: this._id,
+        email: this.email,
         firstName: this.firstName,
         lastName: this.lastName,
         username: this.username,

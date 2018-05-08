@@ -13,7 +13,10 @@ module.exports = function() {
         var msg = message.toJSON();
         msg.owner = user;
         msg.room = room.toJSON(user);
-        app.io.to(room.id).emit('messages:new', msg);
+        app.io.to(room.id).emit('messages:new', {
+            success: true,
+            message: msg
+        });
     });
 
     //
@@ -52,9 +55,16 @@ module.exports = function() {
             MessageController.create(options, function(err, message) {
                 if (err) {
                     console.log(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems creating new message',
+                        error: err
+                    });
                 }
-                res.status(201).json(message);
+                res.status(201).json({
+                    success: true,
+                    message: message
+                });
             });
         },
         list: function(req, res) {
@@ -78,14 +88,21 @@ module.exports = function() {
             MessageController.list(options, function(err, messages) {
                 if (err) {
                     console.log(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems listing messages',
+                        error: err
+                    });
                 }
 
                 messages = messages.map(function(message) {
                     return message.toJSON(req.user);
                 });
 
-                res.json(messages);
+                res.status(200).json({
+                    success: true,
+                    messages: messages
+                });
             });
         }
     });

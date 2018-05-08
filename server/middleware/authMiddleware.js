@@ -8,7 +8,6 @@ const config      = require('./../config');
 module.exports.verifyToken = (req, res, next) => {
     let token = req.body.token || req.params.token || req.headers['x-access-token'];
     var req_scopes = req.body.scope || req.params.scope || req.headers["x-security-scopes"];
-
     if (!token){
         return res.status(403).send({
             auth: false,

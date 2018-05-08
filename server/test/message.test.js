@@ -9,6 +9,8 @@ const User          = require('./../db/schema/user');
 const Room          = require('./../db/schema/room');
 const config        = require('./../config');
 
+const HOST          = "http://localhost:8000";
+
 let sender, receiver,
     senderInfo, receiverInfo,
     senderToken, receiverToken,
@@ -29,14 +31,14 @@ describe('TEST MESSAGE API', () => {
             }
 
             // Create User
-            await axios.post('http://localhost:8000/account/register', {
+            await axios.post(`${HOST}/account/register`, {
                 username: 'message',
                 email: 'message@gmail.com',
                 password: '12345678a',
                 passwordConfirm: '12345678a'
             })
 
-            await axios.post('http://localhost:8000/account/register', {
+            await axios.post(`${HOST}/account/register`, {
                 username: 'message1',
                 email: 'message1@gmail.com',
                 password: '12345678a',
@@ -44,14 +46,14 @@ describe('TEST MESSAGE API', () => {
             })
 
             // Get token
-            let response = await axios.post('http://localhost:8000/account/authenticate', {
+            let response = await axios.post(`${HOST}/account/authenticate`, {
                 username: "message",
                 password: "12345678a"
             });
             senderToken = response.data.token;
             senderInfo = response.data.user;
 
-            response = await axios.post('http://localhost:8000/account/authenticate', {
+            response = await axios.post(`${HOST}/account/authenticate`, {
                 username: "message1",
                 password: "12345678a"
             });
@@ -65,15 +67,16 @@ describe('TEST MESSAGE API', () => {
                 description: 'This is Test room'
             }
 
-            response = await axios.post('http://localhost:8000/rooms', data ,{
+            axios.post(`${HOST}/rooms`, data ,{
                 headers: {
                     'x-access-token': senderToken
                 }
+            }).then((response) => {
+                pRoom = response.data.room;
+                expect(response.status).toBe(201);
+                next();
             });
-            pRoom = response.data;
-            expect(response.status).toBe(200);
 
-            next();
         });
 
     });
@@ -90,11 +93,11 @@ describe('TEST MESSAGE API', () => {
             }
         }
         // connect socket
-        sender = socket('http://localhost:8000/', ioOptions);
+        sender = socket(`${HOST}`, ioOptions);
 
         // connect socket
         ioOptions.query.token = receiverToken;
-        receiver = socket('http://localhost:8000/', ioOptions);
+        receiver = socket(`${HOST}`, ioOptions);
 
         sender.on('connect', function () {
             expect(sender.id).toBeDefined();
@@ -112,15 +115,16 @@ describe('TEST MESSAGE API', () => {
         // Receiver Join room
         receiver.emit('rooms:join', {
             room: pRoom.id
-        }, function(room) {
-            expect(room.owner).toBe(senderInfo.id);
-            expect(room.name).toBe('Room Test 01');
-            expect(room.slug).toBe('msgroom_001');
-            expect(room.description).toBe('This is Test room');
+        }, function(res) {
+            expect(res.room.owner).toBe(senderInfo.id);
+            expect(res.room.name).toBe('Room Test 01');
+            expect(res.room.slug).toBe('msgroom_001');
+            expect(res.room.description).toBe('This is Test room');
+            next();
         });
 
-        receiver.on('messages:new', (message) => {
-            expect(message.text).toBe('This is message send by api');
+        receiver.on('messages:new', (res) => {
+            expect(res.message.text).toBe('This is message send by api');
             next();
         })
         // Send message to room
@@ -128,7 +132,7 @@ describe('TEST MESSAGE API', () => {
             room: pRoom.id,
             text: 'This is message send by api'
         }
-        axios.post(`http://localhost:8000/messages`, message, {
+        axios.post(`${HOST}/messages`, message, {
             headers: {
                 'x-access-token': sender.query.token
             }
@@ -141,15 +145,15 @@ describe('TEST MESSAGE API', () => {
         // Receiver Join room
         receiver.emit('rooms:join', {
             room: pRoom.id
-        }, function(room) {
-            expect(room.owner).toBe(senderInfo.id);
-            expect(room.name).toBe('Room Test 01');
-            expect(room.slug).toBe('msgroom_001');
-            expect(room.description).toBe('This is Test room');
+        }, function(res) {
+            expect(res.room.owner).toBe(senderInfo.id);
+            expect(res.room.name).toBe('Room Test 01');
+            expect(res.room.slug).toBe('msgroom_001');
+            expect(res.room.description).toBe('This is Test room');
         });
 
-        receiver.on('messages:new', (message) => {
-            expect(message.text).toBe('This is message send By socket');
+        receiver.on('messages:new', (res) => {
+            expect(res.message.text).toBe('This is message send By socket');
             next();
         })
         // Send message to room
@@ -157,10 +161,10 @@ describe('TEST MESSAGE API', () => {
             room: pRoom.id,
             text: 'This is message send By socket'
         }
-        sender.emit('messages:create', message, function(msg) {
-            expect(msg.owner).toBe(senderInfo.id);
-            expect(msg.room).toBe(message.room);
-            expect(msg.text).toBe(message.text);
+        sender.emit('messages:create', message, function(res) {
+            expect(res.message.owner).toBe(senderInfo.id);
+            expect(res.message.room).toBe(message.room);
+            expect(res.message.text).toBe(message.text);
         });
     });
 

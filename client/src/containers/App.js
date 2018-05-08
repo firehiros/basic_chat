@@ -21,7 +21,7 @@ import 'styles/app.scss';
 // import Volume from 'containers/Volume';
 // import RateList from 'containers/RateList';
 
-import {COLLAPSED_DRAWER, FIXED_DRAWER} from 'constants/ActionTypes';
+import {COLLAPSED_DRAWER, FIXED_DRAWER} from 'constants/config';
 import {isIOS, isMobile} from 'react-device-detect';
 
 class App extends React.Component {

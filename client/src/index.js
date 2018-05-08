@@ -5,6 +5,8 @@ import { Provider } from 'react-redux';
 import { store, history } from './reduxMgr';
 import AppRoutes from './router';
 
+import Boot from './reduxMgr/boot';
+
 // import ReduxMgr from './ReduxMgr';
 let render = () => {
     ReactDOM.render(
@@ -15,5 +17,5 @@ let render = () => {
     );
 
 };
-
+Boot();
 render();

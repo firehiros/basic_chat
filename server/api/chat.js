@@ -17,8 +17,10 @@ module.exports = function() {
                 type: 'socket.io', userId: userId.toString()
             });
             _.each(connections, function(connection) {
-                // console.log(connection.socket);
-                connection.socket.emit('chat-messages:new', message);
+                connection.socket.emit('chat-messages:new', {
+                    success: true,
+                    message: message
+                });
             });
         });
     });
@@ -27,7 +29,7 @@ module.exports = function() {
     // Routes
     //
 
-    app.route('/users/:user/messages')
+    app.route('/users/:chatuser/messages')
         .all(authMiddlewares.verifyToken)
         .get(function(req) {
             req.io.route('chat-messages:list');
@@ -43,23 +45,29 @@ module.exports = function() {
             let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
             let options = {
                 owner: userId,
-                user: req.param('user'),
+                user: req.param('chatuser'),
                 text: req.param('text')
             };
-
             ChatController.create(options, function(err, message) {
                 if (err) {
                     console.log(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems creating new message',
+                        error: err
+                    });
                 }
-                res.status(201).json(message);
+                res.status(201).json({
+                    success: true,
+                    message: message
+                });
             });
         },
         list: function(req, res) {
             let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
             var options = {
                 currentUser: userId,
-                user: req.param('user'),
+                user: req.param('chatuser'),
                 since_id: req.param('since_id'),
                 from: req.param('from'),
                 to: req.param('to'),
@@ -72,9 +80,16 @@ module.exports = function() {
             ChatController.list(options, function(err, messages) {
                 if (err) {
                     console.log(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems listing messages',
+                        error: err
+                    });
                 }
-                res.json(messages);
+                res.status(200).json({
+                    success: true,
+                    messages: messages
+                });
             });
         }
     });

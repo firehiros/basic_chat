@@ -128,17 +128,23 @@ module.exports = function() {
             RoomController.listRooms(options, function(err, rooms) {
                 if (err) {
                     console.error(err);
-                    return res.status(400).json(err);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems listing rooms',
+                        error: err
+                    });
                 }
 
                 let results = rooms.map(function(room) {
                     return room.toJSON(req.user);
                 });
-
-                res.json(results);
+                res.status(200).json({
+                    success: true,
+                    rooms: results
+                });
             });
         },
-        get: function(req, res,) {
+        get: function(req, res) {
             let userId = req.user ? (req.user._id || req.user.userId || req.user) : null;
 
             let options = {
@@ -148,18 +154,24 @@ module.exports = function() {
             RoomController.getRoomById(options, function(err, room) {
                 if (err) {
                     console.error(err);
-                    return res.status(400).json(err);
-                }
-
-                if (!room) {
-                    return res.status(404).json({
-                        status: 'error',
-                        message: 'Room not found.',
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems getting room',
                         error: err
                     });
                 }
 
-                res.json(room.toJSON(req.user));
+                if (!room) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Room not found.',
+                        error: err
+                    });
+                }
+                res.status(200).json({
+                    success: true,
+                    room: room.toJSON(req.user)
+                });
             });
         },
         create: function(req, res) {
@@ -176,10 +188,16 @@ module.exports = function() {
             RoomController.createRoom(options, function(err, room) {
                 if (err) {
                     console.error(err);
-                    return res.status(400).json(err);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems creating rooms',
+                        error: err
+                    });
                 }
-
-                res.json(room.toJSON(req.user));
+                res.status(201).json({
+                    success: true,
+                    room: room.toJSON(req.user)
+                });
             });
         },
         update: function(req, res) {
@@ -197,14 +215,23 @@ module.exports = function() {
             RoomController.updateRoom(roomId, options, function(err, room) {
                 if (err) {
                     console.log(err);
-                    return res.status(400).json(err);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems updating room',
+                        error: err
+                    });
                 }
 
                 if (!room) {
-                    return res.sendStatus(404);
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Room not found'
+                    });
                 }
-
-                res.json(room.toJSON(req.user));
+                res.status(200).json({
+                    success: true,
+                    room: room.toJSON(req.user)
+                });
             });
         },
         archive: function(req, res) {
@@ -213,14 +240,22 @@ module.exports = function() {
             RoomController.archive(roomId, function(err, room) {
                 if (err) {
                     console.log(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems archiving rooms',
+                        error: err
+                    });
                 }
 
                 if (!room) {
-                    return res.sendStatus(404);
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Room not found'
+                    });
                 }
-
-                res.sendStatus(204);
+                res.status(204).json({
+                    success: true
+                });
             });
         },
         join: function(req, res) {
@@ -239,24 +274,33 @@ module.exports = function() {
             RoomController.canJoin(options, function(err, room, canJoin) {
                 if (err) {
                     console.error(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems joining rooms',
+                        error: err
+                    });
                 }
 
                 if (!room) {
-                    return res.sendStatus(404);
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Room not found'
+                    });
                 }
 
                 if(!canJoin && room.password) {
                     return res.status(403).json({
-                        status: 'error',
+                        success: false,
                         roomName: room.name,
-                        message: 'password required',
-                        errors: 'password required'
+                        message: 'password required'
                     });
                 }
 
                 if(!canJoin) {
-                    return res.sendStatus(404);
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Can not join room'
+                    });;
                 }
 
                 var user = req.user.toJSON();
@@ -264,7 +308,11 @@ module.exports = function() {
 
                 AppManager.join(req.socket.conn, room);
                 req.socket.join(room._id);
-                res.json(room.toJSON(req.user));
+
+                res.status(200).json({
+                    success: true,
+                    room: room.toJSON(req.user)
+                });
             });
         },
         leave: function(req, res) {
@@ -274,7 +322,9 @@ module.exports = function() {
 
             AppManager.leave(req.socket.conn, roomId);
             req.socket.leave(roomId);
-            res.json();
+            res.status(200).json({
+                success: true
+            });
         },
         users: function(req, res) {
             var roomId = req.param('room');
@@ -282,11 +332,18 @@ module.exports = function() {
             RoomController.get(roomId, function(err, room) {
                 if (err) {
                     console.error(err);
-                    return res.sendStatus(400);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems getting users',
+                        error: err
+                    });
                 }
 
                 if (!room) {
-                    return res.sendStatus(404);
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Room not found'
+                    });
                 }
 
                 var users = AppManager.roomManager
@@ -298,7 +355,10 @@ module.exports = function() {
                             return user;
                         });
 
-                res.json(users);
+                res.status(200).json({
+                    success: true,
+                    users: users
+                });
             });
         }
     });

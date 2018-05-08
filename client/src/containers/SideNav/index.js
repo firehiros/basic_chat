@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {withRouter} from 'react-router-dom';
 import Drawer from 'material-ui/Drawer';
-import {Config} from 'constants/common';
+import {Config} from 'constants/config';
 import SidenavContent from './SidenavContent';
 import UserInfo from 'components/UserInfo';
 import {COLLAPSED_DRAWER, FIXED_DRAWER} from 'constants/ActionTypes';

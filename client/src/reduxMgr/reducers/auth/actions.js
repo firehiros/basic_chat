@@ -3,10 +3,17 @@ const actions = {
     LOGIN_REQUEST: 'LOGIN_REQUEST',
     LOGOUT: 'LOGOUT',
     LOGIN_SUCCESS: 'LOGIN_SUCCESS',
-    LOGIN_ERROR: 'LOGIN_ERROR',
+    LOGIN_FAIL: 'LOGIN_FAIL',
     REGISTER_REQUEST: 'REGISTER_REQUEST',
     REGISTER_SUCCESS: 'REGISTER_SUCCESS',
-    REGISTER_ERROR: 'REGISTER_ERROR',
+    REGISTER_FAIL: 'REGISTER_FAIL',
+    VERIFY_TOKEN_REQUEST: 'VERIFY_TOKEN_REQUEST',
+    VERIFY_TOKEN_SUCCESS: 'VERIFY_TOKEN_SUCCESS',
+    VERIFY_TOKEN_FAIL: 'VERIFY_TOKEN_FAIL',
+    CONNECT_SOCKET: 'CONNECT_SOCKET',
+    SOCKET_STATE: 'SOCKET_STATE',
+    SOCKET_FAIL: 'SOCKET_FAIL',
+    DISCONNECT_SOCKET: 'DISCONNECT_SOCKET',
     checkAuthorization: () => ({
         type: actions.CHECK_AUTHORIZATION
     }),
@@ -18,8 +25,8 @@ const actions = {
         type: actions.LOGIN_SUCCESS,
         payload
     }),
-    loginError: (error) => ({
-        type: actions.LOGIN_ERROR,
+    loginFail: (error) => ({
+        type: actions.LOGIN_FAIL,
         error
     }),
     logout: () => ({
@@ -33,9 +40,36 @@ const actions = {
         type: actions.REGISTER_SUCCESS,
         payload
     }),
-    registerError: (error) => ({
-        type: actions.REGISTER_ERROR,
+    registerFail: (error) => ({
+        type: actions.REGISTER_FAIL,
         error
+    }),
+    verifyToken: (param) => ({
+        type: actions.VERIFY_TOKEN_REQUEST,
+        payload: param
+    }),
+    // verifyTokenSuccess: (payload) => ({
+    //     type: actions.VERIFY_TOKEN_SUCCESS,
+    //     payload
+    // }),
+    // verifyTokenFail: (error) => ({
+    //     type: actions.VERIFY_TOKEN_FAIL,
+    //     error
+    // }),
+    connectSocket: (payload) => ({
+        type: actions.CONNECT_SOCKET,
+        param: payload
+    }),
+    socketState: (payload) => ({
+        type: actions.SOCKET_STATE,
+        payload
+    }),
+    socketFail: (payload) => ({
+        type: actions.SOCKET_FAIL,
+        payload
+    }),
+    disconnectSocket: () => ({
+        type: actions.DISCONNECT_SOCKET
     }),
     authenticate: (param) => ({
         type: actions.CHECK_AUTHORIZATION,

@@ -74,7 +74,6 @@ module.exports = class ChatController extends EventEmitter {
             if (cb) {
                 cb(null, message, user, owner);
             }
-
             this.emit('chat-messages:new', message, user, owner, options.data);
         });
     }
@@ -82,7 +81,7 @@ module.exports = class ChatController extends EventEmitter {
     list(options, cb) {
         options = options || {};
 
-        if (!options.room) {
+        if (!options.user) {
             return cb(null, []);
         }
 
@@ -114,7 +113,7 @@ module.exports = class ChatController extends EventEmitter {
             var includes = options.expand.split(',');
 
             if (_.includes(includes, 'owner')) {
-                find.populate('owner', 'id username displayName email avatar');
+                find.populate('owner', 'id username firstname lastname email avatar');
             }
         }
 

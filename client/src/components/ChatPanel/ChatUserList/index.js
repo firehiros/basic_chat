@@ -2,7 +2,6 @@ import React from 'react';
 import UserCell from "./UserCell/index";
 
 const ChatUserList = ({chatUsers, selectedSectionId, onSelectUser}) => {
-    console.log(chatUsers);
     return (
         <div className="chat-user">
             {chatUsers.map((chat, index) =>

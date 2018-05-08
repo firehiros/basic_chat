@@ -7,6 +7,8 @@ const User          = require('./../db/schema/user');
 const Room          = require('./../db/schema/room');
 const config        = require('./../config');
 
+const HOST          = "http://localhost:8000";
+
 let userInfo, pToken;
 describe('TEST ROOM API', () => {
     beforeAll((next) => {
@@ -24,7 +26,7 @@ describe('TEST ROOM API', () => {
             }
 
             // Create User
-            axios.post('http://localhost:8000/account/register', {
+            axios.post(`${HOST}/account/register`, {
                 username: 'room',
                 email: 'room@gmail.com',
                 password: '12345678a',
@@ -45,7 +47,7 @@ describe('TEST ROOM API', () => {
         // User.collection.drop()
     });
     beforeEach((next) => {
-        axios.post('http://localhost:8000/account/authenticate', {
+        axios.post(`${HOST}/account/authenticate`, {
             username: "room",
             password: "12345678a"
         }).then((response) => {
@@ -63,28 +65,28 @@ describe('TEST ROOM API', () => {
             slug: 'room001',
             description: 'This is Test room'
         }
-        response = await axios.post('http://localhost:8000/rooms', data ,{
+        response = await axios.post(`${HOST}/rooms`, data ,{
             headers: {
                 'x-access-token': pToken
             }
         }).catch((error) => console.log(error));
 
-        let room = response.data;
-        expect(response.status).toBe(200);
+        let room = response.data.room;
+        expect(response.status).toBe(201);
         expect(room.owner).toBe(userInfo.id);
         expect(room.name).toBe(data.name);
         expect(room.slug).toBe(data.slug);
         expect(room.description).toBe(data.description);
 
         // Check room is exist
-        response = await axios.get('http://localhost:8000/rooms',{
+        response = await axios.get(`${HOST}/rooms`,{
             headers: {
                 'x-access-token': pToken
             }
         }).catch((error) => console.log(error))
         expect(response.status).toBe(200);
 
-        let rooms = response.data;
+        let rooms = response.data.rooms;
         rooms.forEach((r) => {
             if(r.id === room.id){
                 expect(r.name).toBe(room.name);
@@ -94,13 +96,13 @@ describe('TEST ROOM API', () => {
             }
         });
 
-        response = await axios.get(`http://localhost:8000/rooms/${room.id}`,{
+        response = await axios.get(`${HOST}/rooms/${room.id}`,{
             headers: {
                 'x-access-token': pToken
             }
         }).catch((error) => console.log(error))
         expect(response.status).toBe(200);
-        let r = response.data;
+        let r = response.data.room;
         expect(r.name).toBe(room.name);
         expect(r.slug).toBe(room.slug);
         expect(r.description).toBe(room.description);
@@ -114,14 +116,15 @@ describe('TEST ROOM API', () => {
             slug: 'room002',
             description: 'This is Test room'
         }
-        response = await axios.post('http://localhost:8000/rooms', data, {
+        response = await axios.post(`${HOST}/rooms`, data, {
             headers: {
                 'x-access-token': pToken
             }
         })
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
 
-        response = await axios.put(`http://localhost:8000/rooms/${response.data.id}`, {
+        // Update room
+        response = await axios.put(`${HOST}/rooms/${response.data.room.id}`, {
             name: `Room's name is modified`,
             slug: 'room002',
             description: 'Description is modified'
@@ -130,7 +133,7 @@ describe('TEST ROOM API', () => {
                 'x-access-token': pToken
             }
         })
-        let room = response.data;
+        let room = response.data.room;
         expect(response.status).toBe(200);
         expect(room.owner).toBe(userInfo.id);
         expect(room.name).toBe(`Room's name is modified`);
@@ -145,20 +148,19 @@ describe('TEST ROOM API', () => {
             slug: 'room003',
             description: 'This is Test room'
         }
-        response = await axios.post('http://localhost:8000/rooms', data, {
+        response = await axios.post(`${HOST}/rooms`, data, {
             headers: {
                 'x-access-token': pToken
             }
         })
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
 
         // Delete room
-        response = await axios.delete(`http://localhost:8000/rooms/${response.data.id}`,{
+        response = await axios.delete(`${HOST}/rooms/${response.data.room.id}`,{
             headers: {
                 'x-access-token': pToken
             }
         })
-        let room = response.data;
         expect(response.status).toBe(204);
 
     });

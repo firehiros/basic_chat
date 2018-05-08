@@ -2,113 +2,105 @@ import Moment from 'moment';
 // import users from './data/chatUsers';
 // import conversationList from './data/conversationList';
 import actions from './actions';
-import {
-    ON_HIDE_LOADER,
-    ON_SELECT_USER,
-    ON_TOGGLE_DRAWER,
-    SUBMIT_COMMENT,
-    UPDATE_MESSAGE_VALUE,
-    UPDATE_SEARCH_CHAT_USER,
-    USER_INFO_STATE,
-    REQUEST_USERS_SUCCESS,
-    REQUEST_USERS_ERROR,
-    REQUEST_CONVERSATION_SUCCESS,
-    REQUEST_CONVERSATION_ERROR
-} from "constants/ActionTypes";
-
 
 const initState = {
     loader: false,
     userNotFound: 'No user found',
     drawerState: false,
     selectedSectionId: '',
-    userState: 1,
+    panelState: 1,
     searchChatUser: '',
     selectedUser: null,
     message: '',
-    chatUsers: [],
-    conversation: null,
+    userList: [],
+    conversation: [],
     error: null
 };
 
 export default function chatReducer(state = initState, action) {
 
     switch (action.type) {
-        case REQUEST_USERS_SUCCESS:
-            console.log(action);
+        case actions.REQUEST_USERS_SUCCESS:
             return {
                 ...state,
-                chatUsers: action.payload
+                userList: action.payload.users
             }
-        case REQUEST_USERS_ERROR:
-            return {
-                ...state,
-                error: action.error
-            }
-        case REQUEST_CONVERSATION_SUCCESS:
-            return {
-                ...state,
-                conversation: action.payload.token
-            }
-        case REQUEST_CONVERSATION_ERROR:
+        case actions.REQUEST_USERS_ERROR:
             return {
                 ...state,
                 error: action.error
             }
-        case ON_SELECT_USER: {
+        case actions.ON_SELECT_USER: {
+            return {
+                ...state,
+                selectedSectionId: action.payload.id,
+                selectedUser: action.payload
+            }
+        }
+        case actions.REQUEST_CONVERSATION_SUCCESS:
+            let conversation = action.payload.messages.map(message => {
+                if (message.owner.id === state.selectedUser.id) {
+                    message.type = "received"
+                }
+                return message;
+            })
             return {
                 ...state,
                 loader: true,
                 drawerState: false,
                 selectedSectionId: action.payload.id,
-                selectedUser: action.payload,
-                conversation: state.conversationList.find((data) => data.id === action.payload.id)
+                conversation: conversation
             }
-        }
-        case ON_TOGGLE_DRAWER: {
+        case actions.REQUEST_CONVERSATION_FAIL:
+            return {
+                ...state,
+                error: action.error
+            }
+        case actions.ON_TOGGLE_DRAWER: {
             return {
                 ...state,
                 drawerState: !state.drawerState
             }
         }
-        case ON_HIDE_LOADER: {
+        case actions.ON_HIDE_LOADER: {
             return {
                 ...state,
                 loader: false
             }
         }
-        case USER_INFO_STATE: {
+        case actions.CHANGE_PANEL_STATE: {
             return {
                 ...state,
-                userState: action.payload
+                panelState: action.payload
             }
         }
 
-        case SUBMIT_COMMENT: {
-            const updatedConversation = state.conversation.conversationData.concat({
-                'type': 'sent',
-                'message': state.message,
-                'sentAt': Moment(new Date).format('ddd DD, YYYY, hh:mm:ss A'),
-            });
+        case actions.SUBMIT_COMMENT_SUCCESS: {
+            console.log(actions.SUBMIT_COMMENT_SUCCESS)
+            console.log(action.payload)
+            let message = action.payload.message;
+            if (message.owner === state.selectedUser.id) {
+                message.type = "received"
+            }
+            // state.conversation.push(message);
 
             return {
                 ...state,
-                conversation: {
-                    ...state.conversation, conversationData: updatedConversation
-                },
                 message: '',
-                conversationList: state.conversationList.map(conversationData => {
-                    if (conversationData.id === state.conversation.id) {
-                        return {...state.conversation, conversationData: updatedConversation};
-                    } else {
-                        return conversationData;
-                    }
-                })
-
+                conversation: [
+                    ...state.conversation,
+                    message
+                ]
             }
         }
-
-        case UPDATE_MESSAGE_VALUE: {
+        case actions.SUBMIT_COMMENT_FAIL:
+            return {
+                ...state,
+                error: action.error
+            }
+        case actions.QUIT_CHAT:
+            return initState;
+        case actions.UPDATE_MESSAGE_VALUE: {
             return {...state, message: action.payload}
         }
         default:

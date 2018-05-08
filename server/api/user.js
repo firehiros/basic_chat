@@ -31,10 +31,16 @@ module.exports = function() {
             UserController.list(options, function(err, users) {
                 if (err) {
                     console.log(err);
-                    return res.status(400).json(err);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems listing users',
+                        error: err
+                    })
                 }
-
-                res.json(users);
+                res.status(200).json({
+                    success: true,
+                    users: users
+                });
             });
         },
         get: function(req, res) {
@@ -43,14 +49,23 @@ module.exports = function() {
             User.findByIdentifier(identifier, function (err, user) {
                 if (err) {
                     console.error(err);
-                    return res.status(400).json(err);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'There were problems getting user',
+                        error: err
+                    })
                 }
 
                 if (!user) {
-                    return res.sendStatus(404);
+                    return res.sendStatus(404).json({
+                        success: false,
+                        message: 'User not found'
+                    });
                 }
-
-                res.json(user);
+                res.status(200).json({
+                    success: true,
+                    user: user
+                });
             });
         }
     });

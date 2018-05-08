@@ -1,16 +1,17 @@
-import {DRAWER_TYPE, TOGGLE_COLLAPSED_NAV} from 'constants/ActionTypes';
 
-const actions = {
+const actions = {// Customizer const
+    TOGGLE_COLLAPSED_NAV : 'TOGGLE_COLLAPSED_NAV',
+    DRAWER_TYPE : 'DRAWER_TYPE',
     toggleCollapsedNav : (isNavCollapsed) => {
         return {
-            type: TOGGLE_COLLAPSED_NAV,
+            type: actions.TOGGLE_COLLAPSED_NAV,
             isNavCollapsed
         };
     },
 
     setDrawerType : (drawerType) =>  {
         return {
-            type: DRAWER_TYPE,
+            type: actions.DRAWER_TYPE,
             drawerType
         };
     }

@@ -1,73 +1,80 @@
-import {
-    FILTER_USERS,
-    ON_HIDE_LOADER,
-    ON_SELECT_USER,
-    ON_TOGGLE_DRAWER,
-    SUBMIT_COMMENT,
-    UPDATE_MESSAGE_VALUE,
-    USER_INFO_STATE,
-    REQUEST_CONNECT,
-    REQUEST_USERS,
-    REQUEST_USERS_SUCCESS,
-    REQUEST_USERS_FAIL,
-    REQUEST_CONVERSATION,
-    REQUEST_CONVERSATION_SUCCESS,
-    REQUEST_CONVERSATION_FAIL
-} from "constants/ActionTypes";
-
 const actions = {
+    // Chat Module const
+    REQUEST_USERS : 'REQUEST_USERS',
+    REQUEST_USERS_SUCCESS : 'REQUEST_USERS_SUCCESS',
+    REQUEST_USERS_FAIL : 'REQUEST_USERS_FAIL',
+    REQUEST_CONVERSATION : 'REQUEST_CONVERSATION',
+    REQUEST_CONVERSATION_SUCCESS : 'REQUEST_CONVERSATION_SUCCESS',
+    REQUEST_CONVERSATION_FAIL : 'REQUEST_CONVERSATION_FAIL',
+    ON_SELECT_USER : 'ON_SELECT_USER',
+    ON_HIDE_LOADER : 'ON_HIDE_LOADER',
+    CHANGE_PANEL_STATE : 'CHANGE_PANEL_STATE',
+    SUBMIT_COMMENT : 'SUBMIT_COMMENT',
+    SUBMIT_COMMENT_SUCCESS : 'SUBMIT_COMMENT_SUCCESS',
+    SUBMIT_COMMENT_FAIL : 'SUBMIT_COMMENT_FAIL',
+    UPDATE_MESSAGE_VALUE : 'UPDATE_MESSAGE_VALUE',
+    UPDATE_SEARCH_CHAT_USER : 'UPDATE_SEARCH_CHAT_USER',
+    QUIT_CHAT : 'QUIT_CHAT',
+    hideLoader: () => ({
+        type: actions.ON_HIDE_LOADER
+    }),
+    onChatToggleDrawer: () => ({
+        type: actions.ON_TOGGLE_DRAWER
+    }),
     requestConnect: (param) => ({
-        type: REQUEST_CONNECT,
+        type: actions.REQUEST_CONNECT,
         payload: param
     }),
     requestUsers: (param) => ({
-        type: REQUEST_USERS,
+        type: actions.REQUEST_USERS,
         payload: param
     }),
     requestUsersSuccess: (payload) => ({
-        type: REQUEST_USERS_SUCCESS,
+        type: actions.REQUEST_USERS_SUCCESS,
         payload
     }),
     requestUsersError: (error) => ({
-        type: REQUEST_USERS_FAIL,
+        type: actions.REQUEST_USERS_FAIL,
         error
     }),
-    requestConversation: (param) => ({
-        type: REQUEST_CONVERSATION,
-        payload: param
+    requestConversation: (param, token) => ({
+        type: actions.REQUEST_CONVERSATION,
+        payload: { ...param, token }
     }),
     requestConversationSuccess: (payload) => ({
-        type: REQUEST_CONVERSATION_SUCCESS,
+        type: actions.REQUEST_CONVERSATION_SUCCESS,
         payload
     }),
     requestConversationFail: (error) => ({
-        type: REQUEST_CONVERSATION_FAIL,
+        type: actions.REQUEST_CONVERSATION_FAIL,
         error
     }),
     onSelectUser: (user) => ({
-        type: ON_SELECT_USER,
+        type: actions.ON_SELECT_USER,
         payload: user
     }),
-    submitComment: () => ({
-        type: SUBMIT_COMMENT
+    submitComment: (param, token) => ({
+        type: actions.SUBMIT_COMMENT,
+        payload: { ...param, token }
     }),
-    hideLoader: () => ({
-        type: ON_HIDE_LOADER
+    submitCommentSuccess: (payload) => ({
+        type: actions.SUBMIT_COMMENT_SUCCESS,
+        payload
     }),
-    onChatToggleDrawer: () => ({
-        type: ON_TOGGLE_DRAWER
+    submitCommentFail: (error) => ({
+        type: actions.SUBMIT_COMMENT_FAIL,
+        error
     }),
-    onSelectUser: (user) => ({
-        type: ON_SELECT_USER,
-        payload: user
-    }),
-    userInfoState: (state) => ({
-        type: USER_INFO_STATE,
+    changePanelState: (state) => ({
+        type: actions.CHANGE_PANEL_STATE,
         payload: state
     }),
     updateMessageValue: (message) => ({
-        type: UPDATE_MESSAGE_VALUE,
+        type: actions.UPDATE_MESSAGE_VALUE,
         payload: message
+    }),
+    quitChat: () => ({
+        type: actions.QUIT_CHAT
     }),
 };
 export default actions;

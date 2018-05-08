@@ -3,32 +3,54 @@ import actions from './actions';
 
 const initState = {
     userToken: null,
-    error: null
+    userInfo: {},
+    socket: null,
+    notify: null
 };
-
 
 export default function authReducer(state = initState, action) {
     switch (action.type) {
         case actions.LOGIN_SUCCESS:
             return {
                 ...state,
-                userToken: action.payload.token
+                userToken: action.payload.token,
+                userInfo: action.payload.user || initState.userInfo,
             }
-        case actions.LOGIN_ERROR:
+        case actions.LOGIN_FAIL:
             return {
                 ...state,
-                error: action.error
+                notify: action.error
             }
-        case actions.REGISTER_SUCCESS:
-            console.log(action);
+        // case actions.VERIFY_TOKEN_SUCCESS:
+        //     return {
+        //         ...state,
+        //         userToken: action.payload.token,
+        //         userInfo: action.payload.user || initState.userInfo,
+        //     }
+        // case actions.VERIFY_TOKEN_FAIL:
+        //     return {
+        //         ...state,
+        //         error: action.error
+        //     }
+        case actions.REGISTER_FAIL:
             return {
                 ...state,
-                userToken: action.payload.token
+                notify: action.error
             }
-        case actions.REGISTER_ERROR:
+        case actions.SOCKET_STATE:
             return {
                 ...state,
-                error: action.error
+                socket: action.payload
+            }
+        case actions.SOCKET_FAIL:
+            return {
+                ...state,
+                notify: action.error
+            }
+        case actions.DISCONNECT_SOCKET:
+            return {
+                ...state,
+                socket: null
             }
         case actions.LOGOUT:
             return initState;

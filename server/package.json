@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "test": "jest",
-    "start": "NODE_ENV='development' SECRECT='secrect_code' node app.js"
+    "start": "NODE_ENV='development' SECRECT='secrect_code' node app.js",
+    "server_test": "SECRECT='secrect_code' node app.js"
   },
   "repository": {
     "type": "git",

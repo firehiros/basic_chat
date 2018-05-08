@@ -9,6 +9,8 @@ const User          = require('./../db/schema/user');
 const Room          = require('./../db/schema/room');
 const config        = require('./../config');
 
+const HOST          = "http://localhost:8000";
+
 let sender, receiver,
     senderInfo, receiverInfo,
     senderToken, receiverToken,
@@ -30,14 +32,14 @@ describe('TEST CHAT API', () => {
             }
 
             // Create User
-            let response = await axios.post('http://localhost:8000/account/register', {
+            let response = await axios.post(`${HOST}/account/register`, {
                 username: 'chat',
                 email: 'chat@gmail.com',
                 password: '12345678a',
                 passwordConfirm: '12345678a'
             });
 
-            response = await axios.post('http://localhost:8000/account/register', {
+            response = await axios.post(`${HOST}/account/register`, {
                 username: 'chat1',
                 email: 'chat1@gmail.com',
                 password: '12345678a',
@@ -45,7 +47,7 @@ describe('TEST CHAT API', () => {
             });
 
             // Get token
-            response = await axios.post('http://localhost:8000/account/authenticate', {
+            response = await axios.post(`${HOST}/account/authenticate`, {
                 username: "chat",
                 password: "12345678a"
             })
@@ -53,7 +55,7 @@ describe('TEST CHAT API', () => {
             senderToken = response.data.token;
             senderInfo = response.data.user;
 
-            response = await axios.post('http://localhost:8000/account/authenticate', {
+            response = await axios.post(`${HOST}/account/authenticate`, {
                 username: "chat1",
                 password: "12345678a"
             }).catch((error) => console.log(error));
@@ -78,14 +80,14 @@ describe('TEST CHAT API', () => {
         }
 
         // connect socket
-        sender = socket('http://localhost:8000/', ioOptions);
+        sender = socket(`${HOST}`, ioOptions);
         sender.on('connect', function () {
             expect(sender.id).toBeDefined();
         });
 
         // connect socket
         ioOptions.query.token = receiverToken;
-        receiver = socket('http://localhost:8000/', ioOptions);
+        receiver = socket(`${HOST}`, ioOptions);
         receiver.on('connect', function () {
             expect(receiver.id).toBeDefined();
         });
@@ -104,31 +106,32 @@ describe('TEST CHAT API', () => {
             text: 'HELLO FRED1'
         }
 
-        axios.post(`http://localhost:8000/users/${receiverInfo.id}/messages`, data,{
+        axios.post(`${HOST}/users/${receiverInfo.id}/messages`, data,{
             headers: {
                 'x-access-token': senderToken
             }
         }).then((response) => {
             expect(response.status).toBe(201);
-            expect(response.data.text).toBe('HELLO FRED1');
+            expect(response.data.message.text).toBe('HELLO FRED1');
             next()
         }).catch((error) => console.log(error));
     }, 10000);
+
     it(`Chat with another user By Socket`, (next) => {
         let data = {
             user: receiverInfo.id,
             text: 'HELLO FRED1'
         }
-        receiver.on('chat-messages:new', (message) => {
-            expect(message.text).toBe('HELLO FRED1');
+        receiver.on('chat-messages:new', (res) => {
+            expect(res.message.text).toBe('HELLO FRED1');
             next();
         })
-        sender.on('chat-messages:new', (message) => {
-            expect(message.text).toBe('HELLO FRED1');
+        sender.on('chat-messages:new', (res) => {
+            expect(res.message.text).toBe('HELLO FRED1');
             next();
         })
-        sender.emit('chat-messages:create', data, (message) => {
-            expect(message.text).toBe('HELLO FRED1');
+        sender.emit('chat-messages:create', data, (res) => {
+            expect(res.message.text).toBe('HELLO FRED1');
         });
     }, 10000);
 

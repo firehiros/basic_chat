@@ -15,7 +15,7 @@ class Login extends Component{
         isLoggedIn: false,
         redirectToHome: false,
         isShowNotification: false,
-        error: this.props.error
+        notify: this.props.notify
     };
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -26,9 +26,9 @@ class Login extends Component{
               }
         }
 
-        if (prevState.error !== nextProps.error && typeof nextProps.error !== 'undefined') {
+        if (prevState.notify !== nextProps.notify && typeof nextProps.notify !== 'undefined') {
             return {
-                error: nextProps.error,
+                notify: nextProps.notify,
                 isShowNotification: true
             }
         }
@@ -50,9 +50,18 @@ class Login extends Component{
         }
     }
     handleNotification = () => {
-        let error = this.state.error;
+        let notify = this.state.notify;
 
-        NotificationManager.error(error.message, 'Login Fail');
+        NotificationManager.error(notify.message, 'Login Fail');
+        if(notify.error && notify.error.errors){
+            let erros = notify.error.errors;
+            let keys = Object.keys(erros);
+            keys.forEach((err) => {
+                if(erros[err]){
+                    NotificationManager.error(`${err} : ${erros[err].message}`, 'Login Fail');
+                }
+            })
+        }
 
         this.setState({ isShowNotification: false });
     }
@@ -116,6 +125,6 @@ class Login extends Component{
 };
 const mapStateToProps = state => ({
     isLoggedIn: state.auth.userToken !== null,
-    error: state.auth.error
+    notify: state.auth.notify
 });
 export default connect(mapStateToProps, { login: authAction.login } )(Login);

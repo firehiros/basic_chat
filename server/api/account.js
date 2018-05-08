@@ -33,35 +33,70 @@ module.exports = function() {
         if (!identifier || !fields.password) {
             return res.status(400).json({
                 success: false,
-                message: 'Authentication failed. Credentials is incorrect.'
+                message: 'Authentication failed. Credentials is incorrect'
             });
         }
         User.authenticate(identifier, fields.password, (err, user, isMatch) => {
             if (err) {
-                console.log(err);
-                return res.status(400).json(err);
+                return res.status(400).json({
+                    success: false,
+                    message: 'There were problems authenticating you',
+                    error: err
+                });
             }
             if (!user) {
                 res.status(401).json({
                     success: false,
-                    message: 'Authentication failed. User not found.'
+                    message: 'Authentication failed. User not found'
                 });
             } else {
                 if (!isMatch) {
                     res.status(401).json({
                         success: false,
-                        message: 'Authentication failed. Wrong password.'
+                        message: 'Authentication failed. Wrong password'
                     });
                 } else {
                     let token = user.generateToken();
 
-                    res.status(201).send({
-                      success: true,
-                      message: 'Authentication successful',
-                      token: token,
-                      user: user
+                    res.status(200).send({
+                        success: true,
+                        token: token,
+                        user: user
                     });
                 }
+            }
+        });
+    });
+
+    app.post('/account/verifyToken', function(req, res) {
+        var fields = req.body || req.data;
+        let token = fields.token;
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: 'Verify failed.'
+            });
+        }
+        User.findByToken(token, (err, user) => {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({
+                    success: false,
+                    message: 'There were problems verifing token',
+                    error: err
+                });
+            }
+            if (!user) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication failed. User not found'
+                });
+            } else {
+                res.status(200).send({
+                    success: true,
+                    token: token,
+                    user: user
+                });
             }
         });
     });
@@ -75,7 +110,8 @@ module.exports = function() {
 
         if (fields.password !== passwordConfirm) {
             return res.status(400).json({
-                message: 'Password not confirmed'
+                success: false,
+                message: 'Confirm password  does not match'
             });
         }
 
@@ -88,16 +124,18 @@ module.exports = function() {
             lastName: fields.lastName || fields.lastname || fields['last-name'],
             avatar: fields.avatar || fields.avatar || fields['avatar']
         };
-
         User.create(data, function(err, user) {
             if (err) {
-                console.log(err);
-                return res.status(400).json(err);
+                return res.status(400).json({
+                    success: false,
+                    message: 'There were problems creating user',
+                    error: err
+                });
             }
             let token = user.generateToken();
 
             res.status(201).json({
-                message: 'You\'ve been registered, please try logging in now!',
+                success: true,
                 token: token,
                 user: user
             });
@@ -110,18 +148,20 @@ module.exports = function() {
             if (err) {
                 console.log(err);
                 return res.status(500).send({
+                    success: false,
+                    message: 'Bad request',
                     error: err
                 })
             }
             if (!user) {
                 res.status(400).json({
                     success: false,
-                    message: 'User not found.',
+                    message: 'User not found',
                 });
             } else if (user) {
-                res.status(201).send({
-                  success: true,
-                  user: user
+                res.status(200).send({
+                    success: true,
+                    user: user
                 });
             }
         });
@@ -146,6 +186,7 @@ module.exports = function() {
 
         if (data.newPassword && data.newPassword !== data.passwordConfirm) {
             return res.status(400).json({
+                success: false,
                 message: 'Password not confirmed'
             });
         }
@@ -153,8 +194,9 @@ module.exports = function() {
         User.authenticate(data.username || data.email, data.currentPassword, (err, user, isMatch) => {
             if (err) {
                 console.log(err);
-                return res.status(401).json({
-                    message: 'There were problems authenticating you.',
+                return res.status(400).json({
+                    success: false,
+                    message: 'There were problems authenticating you',
                     error: err
                 });
             }
@@ -162,30 +204,32 @@ module.exports = function() {
             if (!user) {
                 res.status(401).json({
                     success: false,
-                    message: 'Authentication failed. User not found.'
+                    message: 'Authentication failed. User not found'
                 });
             } else {
                 if (!isMatch) {
                     res.status(401).json({
                         success: false,
-                        message: 'Incorrect login credentials.'
+                        message: 'Incorrect login credentials'
                     });
                 } else {
-
                     User.updateProfile(userId, data, function (err, user, reason) {
                         if (err) {
-                            return res.status(400).json(err);
+                            return res.status(400).json({
+                                success: false,
+                                message: 'There were problems updating your profile',
+                                error: err
+                            });
                         }
                         if (!user) {
                             res.status(401).json({
                                 success: false,
-                                message: 'Authentication failed. User not found.'
+                                message: 'Authentication failed. User not found'
                             });
                         }
                         let token = user.generateToken();
-                        res.status(201).json({
+                        res.status(200).json({
                           success: true,
-                          message: 'Update successfully',
                           token: token,
                           user: user
                         });

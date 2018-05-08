@@ -1,4 +1,4 @@
-import {FIXED_DRAWER, DRAWER_TYPE, TOGGLE_COLLAPSED_NAV} from 'constants/ActionTypes';
+import {FIXED_DRAWER} from 'constants/config';
 import actions, { getView } from './actions';
 
 const initState = {
@@ -13,12 +13,12 @@ export default function appReducer(state = initState, action) {
                 ...state,
                 navCollapsed: false
             };
-        case TOGGLE_COLLAPSED_NAV:
+        case action.TOGGLE_COLLAPSED_NAV:
             return {
                 ...state,
                 navCollapsed: action.isNavCollapsed
             };
-        case DRAWER_TYPE:
+        case action.DRAWER_TYPE:
             return {
                 ...state,
                 drawerType: action.drawerType
