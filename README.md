@@ -12,6 +12,9 @@ Using:
 - React-redux
 - Socket
 
+### INSTALL MongoDB
+ Please install [mongodb](https://www.mongodb.com/cloud/atlas/lp/general/download?jmp=search&utm_source=google&utm_campaign=APAC-Japan-Ent-to-Atlas-Brand-Alpha&utm_keyword=install%20mongodb&utm_device=c&utm_network=g&utm_medium=cpc&utm_creative=260966752501&utm_matchtype=e&_bt=260966752501&_bk=install%20mongodb&_bm=e&_bn=g&gclid=CjwKCAjwlcXXBRBhEiwApfHGTUm-5dTW26xLKeKINwkSvl1oX7mC4yZV7fbUBQ8ku6KAa8yUWqt1vRoCfi8QAvD_BwE) before run this application
+
 ### START SERVER
 Step 1: Move to ./server folder
 
