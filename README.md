@@ -2,9 +2,8 @@
 
 A Basic chat application:
 
-- Chat Application
-- View Top Cryptocurrency
-- Trade between user
+- Login/register
+- Chat with others
 
 Using:
 - MongoDB
